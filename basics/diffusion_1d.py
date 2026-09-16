@@ -121,7 +121,11 @@ def run_all_cases(output_root: str | Path = "results") -> None:
 def make_plots(problem: Problem, root: Path, refinement: list[tuple[int, float]], times: tuple[float, ...]) -> None:
     root.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots()
+    # Keep the profile figure readable; all cases remain available in CSV files.
+    plot_meshes = {10, 160, 320}
     for n, dt in refinement:
+        if n not in plot_meshes:
+            continue
         x, _, _ = grid_and_initial_condition(problem, n)
         solutions = solve(problem, n, dt, times)
         for time in times:
