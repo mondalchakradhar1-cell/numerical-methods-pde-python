@@ -66,7 +66,7 @@ def solve(problem: Problem, n: int, dt: float, output_times: tuple[float, ...] =
     current_time = 0.0
     for target in requested[1:]:
         nsteps = int(round((target - current_time) / dt))
-        if not math.isclose(current_time + nsteps * dt, target, rel_tol=0.0, abs_tol=1e-12):
+        if not math.isclose(current_time + nsteps * dt, target, rel_tol=0.0, abs_tol=1e-9):
             raise ValueError("output times must be integer multiples of dt")
         for _ in range(nsteps):
             old = c.copy()
