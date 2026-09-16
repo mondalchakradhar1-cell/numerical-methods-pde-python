@@ -65,10 +65,10 @@ def solve(problem: Problem, n: int, dt: float, output_times: tuple[float, ...] =
     results = {0.0: c.copy()}
     current_time = 0.0
     for target in requested[1:]:
-        while current_time < target - 1e-14:
-            step = min(dt, target - current_time)
-            if not math.isclose(step, dt):
-                raise ValueError("output times must be integer multiples of dt")
+        nsteps = int(round((target - current_time) / dt))
+        if not math.isclose(current_time + nsteps * dt, target, rel_tol=0.0, abs_tol=1e-12):
+            raise ValueError("output times must be integer multiples of dt")
+        for _ in range(nsteps):
             old = c.copy()
             # Interior: c_i^(n+1) = c_i^n + r(c_(i+1)^n - 2c_i^n + c_(i-1)^n)
             c[1:-1] = old[1:-1] + r * (old[2:] - 2.0 * old[1:-1] + old[:-2])
