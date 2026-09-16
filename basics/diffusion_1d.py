@@ -120,16 +120,17 @@ def run_all_cases(output_root: str | Path = "results") -> None:
 
 def make_plots(problem: Problem, root: Path, refinement: list[tuple[int, float]], times: tuple[float, ...]) -> None:
     root.mkdir(parents=True, exist_ok=True)
-    times_1s = tuple(np.arange(0.0, 0.05 + 0.0005, 0.001))
     all_results = {}
     for n, dt in refinement:
         x, _, _ = grid_and_initial_condition(problem, n)
-        all_results[n] = (x, solve(problem, n, dt, times_1s))
+        output_spacing = 0.002 if n == 10 else 0.001
+        output_times = tuple(np.arange(0.0, 0.05 + 0.5 * output_spacing, output_spacing))
+        all_results[n] = (x, solve(problem, n, dt, output_times))
 
     # Plot 1: all six meshes, each in its own panel, at 0.05 s intervals.
     fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
     for ax, (n, (x, solutions)) in zip(axes.flat, all_results.items()):
-        for time in times_1s:
+        for time in solutions:
             ax.plot(x, solutions[time], label=f"t={time:g}")
         ax.set_title(f"N={n}")
         ax.set_xlabel("x (m)")
@@ -145,7 +146,7 @@ def make_plots(problem: Problem, root: Path, refinement: list[tuple[int, float]]
     for n in (10, 160, 320):
         x, solutions = all_results[n]
         fig, ax = plt.subplots(figsize=(8, 5))
-        for time in times_1s:
+        for time in solutions:
             ax.plot(x, solutions[time], label=f"t={time:g} s")
         ax.set(xlabel="x (m)", ylabel="c (mol m$^{-3}$)", title=f"1D diffusion: N={n}")
         ax.grid(alpha=0.25)
