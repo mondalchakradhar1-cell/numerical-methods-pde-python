@@ -120,7 +120,7 @@ def run_all_cases(output_root: str | Path = "results") -> None:
 
 def make_plots(problem: Problem, root: Path, refinement: list[tuple[int, float]], times: tuple[float, ...]) -> None:
     root.mkdir(parents=True, exist_ok=True)
-    times_1s = tuple(np.arange(0.0, 1.0 + 0.025, 0.05))
+    times_1s = tuple(np.arange(0.0, 0.05 + 0.0005, 0.001))
     all_results = {}
     for n, dt in refinement:
         x, _, _ = grid_and_initial_condition(problem, n)
