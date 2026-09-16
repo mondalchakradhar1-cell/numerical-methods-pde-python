@@ -120,21 +120,40 @@ def run_all_cases(output_root: str | Path = "results") -> None:
 
 def make_plots(problem: Problem, root: Path, refinement: list[tuple[int, float]], times: tuple[float, ...]) -> None:
     root.mkdir(parents=True, exist_ok=True)
-    fig, ax = plt.subplots()
-    # Keep the profile figure readable; all cases remain available in CSV files.
-    plot_meshes = {10, 160, 320}
+    times_1s = tuple(np.arange(0.0, 1.0 + 0.025, 0.05))
+    all_results = {}
     for n, dt in refinement:
-        if n not in plot_meshes:
-            continue
         x, _, _ = grid_and_initial_condition(problem, n)
-        solutions = solve(problem, n, dt, times)
-        for time in times:
-            ax.plot(x, solutions[time], label=f"N={n}, t={time:g}")
-    ax.set(xlabel="x (m)", ylabel="c (mol m$^{-3}$)", title="Numerical concentration profiles")
-    ax.legend(fontsize=7, ncol=2)
-    fig.savefig(root / "numerical_profiles.png", dpi=160, bbox_inches="tight")
+        all_results[n] = (x, solve(problem, n, dt, times_1s))
+
+    # Plot 1: all six meshes, each in its own panel, at 0.05 s intervals.
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
+    for ax, (n, (x, solutions)) in zip(axes.flat, all_results.items()):
+        for time in times_1s:
+            ax.plot(x, solutions[time], label=f"t={time:g}")
+        ax.set_title(f"N={n}")
+        ax.set_xlabel("x (m)")
+        ax.set_ylabel("c (mol m$^{-3}$)")
+        ax.grid(alpha=0.25)
+    axes.flat[-1].legend(fontsize=7, ncol=2)
+    fig.suptitle("1D diffusion for all mesh values")
+    fig.tight_layout()
+    fig.savefig(root / "diffusion_all_meshes.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
+    # Plots 2-4: separate readable figures for the requested meshes.
+    for n in (10, 160, 320):
+        x, solutions = all_results[n]
+        fig, ax = plt.subplots(figsize=(8, 5))
+        for time in times_1s:
+            ax.plot(x, solutions[time], label=f"t={time:g} s")
+        ax.set(xlabel="x (m)", ylabel="c (mol m$^{-3}$)", title=f"1D diffusion: N={n}")
+        ax.grid(alpha=0.25)
+        ax.legend(fontsize=8, ncol=2)
+        fig.savefig(root / f"diffusion_N{n}.png", dpi=160, bbox_inches="tight")
+        plt.close(fig)
+
+    # Preserve the final-time numerical/reference comparison figure.
     n, dt = refinement[-1]
     x, _, _ = grid_and_initial_condition(problem, n)
     numerical = solve(problem, n, dt, (problem.final_time,))[problem.final_time]
