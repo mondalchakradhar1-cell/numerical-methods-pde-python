@@ -335,3 +335,14 @@ A table gives these for A*, P, B and E_PDF at both flows. The hand estimate is 2
 - **IN / OUT arrows:** placed at the inlet and outlet nodes of the coolant network (rebuilt with `layouts.build`; the grid matches the stored field). Each model is rotated so its ports face the camera.
 
 Slide 12 now shows each coil with a short title, a one-line description and a "How to read" key.
+
+## 7 Oct: consistency pass on the short deck and the briefing PDF
+
+At the user's request I checked both files for statements that contradict each other or the results, without rewriting them. Fixed:
+
+- **Flattest coil type.** B (42.3 mK) is flatter than E_PDF (43.5 mK) in the coil model. The "smallest spread: E_PDF 43 mK" card and every "E_PDF, B, E" ranking now read "B, E_PDF, E" / "B and E_PDF (42–43 mK)". In the 3-D coolant flow E_PDF is flattest (37 vs 40 mK); that slide keeps its order.
+- **E_PDF pressure drop.** 14.3 kPa (3-D flow, galleries included) and 10.7 kPa (coil table, friction only) are now labelled as such.
+- **E_PDF spread.** The coolant table slide explains why the 3-D flow and the coil table differ (37 vs 43 mK).
+- **Inlet range.** "−30.1 to −30.3 °C for all layouts" ignored D (−30.68) and F (−30.30); the exceptions are now stated. The briefing range "−30.12 to −30.31" is corrected to −30.09 to −30.15 °C at 17.5 g/s and −30.24 to −30.33 °C at 5 g/s.
+- **Vapour effect on the inlet.** "10–20 mK" and "a few mK" are unified to 9–19 mK colder inlet and a 0–2.5 mK spread change.
+- **Slide count.** The briefing's "short deck (25 slides)" now says 30.

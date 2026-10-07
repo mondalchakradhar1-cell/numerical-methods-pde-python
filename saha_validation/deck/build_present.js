@@ -290,7 +290,7 @@ s.addText([{ text: "How to read", options: { bold: true, fontFace: "Cambria", fo
   { text: "Bronze: the inner copper wall and the two end plates; the faint shell is the copper carrier the passages sit in.", options: { fontSize: 10.5 } }],
   { x: 10.95, y: 4.3, w: 2.0, h: 2.6, isTextBox: true, margin: 0, valign: "top", color: C.text1 });
 
-s = content("Zone 1 inner-wall spread for every coil type, at both flows", SEC[2], `All 11 coil types keep Zone 1 well inside the 300 mK band; E_PDF, B and E are the flattest`);
+s = content("Zone 1 inner-wall spread for every coil type, at both flows", SEC[2], `All 11 coil types keep Zone 1 well inside the 300 mK band; B, E_PDF and E are the flattest (42–45 mK)`);
 s.addChart(pres.charts.BAR, [
   { name: "17.5 g/s", labels: ORDER.map(short), values: ORDER.map((k) => +lay(k, 17.5).spread.toFixed(1)) },
   { name: "5 g/s", labels: ORDER.map(short), values: ORDER.map((k) => +lay(k, 5).spread.toFixed(1)) },
@@ -307,14 +307,14 @@ ORDER.forEach((k) => {
     TD(`${f2(a.inlet - a.margin / 1000)} to ${f2(a.inlet + a.margin / 1000)}`), TD(f1(a.dp)), TD(re)]);
   T1[T1.length - 1].forEach((c) => { c.options.fontSize = 10; });
 });
-s = content("Zone 1, coil by coil: spread, inlet temperature, pressure drop", SEC[2], "Set the Zone 1 inlet near −30.15 °C at 17.5 g/s and −30.3 °C at 5 g/s; −31.5 °C is outside every window");
+s = content("Zone 1, coil by coil: spread, inlet temperature, pressure drop", SEC[2], "Set the Zone 1 inlet near −30.15 °C at 17.5 g/s and −30.3 °C at 5 g/s (D and F colder, see table); −31.5 °C is outside every window");
 s.addTable(T1.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 0.5, y: 1.3, w: 12.3, colW: [3.6, 1.6, 2.5, 2.0, 1.4, 1.2], rowH: 0.38, border: TB, objectName: "layout table" });
 note(s, "Window = inlet range that keeps every point of the inner wall within −30 ± 0.15 °C. Δp is straight-pipe friction only (bends and fittings add to it). D's film is taken laminar at Re ≈ 3900; if it is turbulent its inlet moves to about −30.12 °C.", 0.5, 6.5, 12.3, 0.4, 9.5);
 
 // ================================================================= 03 coolant CFD
 divider("03", "The methanol itself, in 3-D", "Laminar Navier–Stokes in every passage, the coolant warming as it travels, and the copper around it", SEC[3]);
 const e17 = cfd("E_PDF", 17.5);
-s = content("Paired axial sleeve (E_PDF): temperature, streamlines and pressure", SEC[3], `E_PDF at 17.5 g/s: spread ${f0(e17.spread_mK)} mK, inlet ${f3(e17.inlet_C)} °C, methanol warms ${f0(e17.rise_mK)} mK, Δp ${f1(e17.dp_kPa)} kPa`);
+s = content("Paired axial sleeve (E_PDF): temperature, streamlines and pressure", SEC[3], `E_PDF at 17.5 g/s in the 3-D flow: spread ${f0(e17.spread_mK)} mK, inlet ${f3(e17.inlet_C)} °C, methanol warms ${f0(e17.rise_mK)} mK, Δp ${f1(e17.dp_kPa)} kPa including the galleries`);
 addFit(s, fig("coolant/E_PDF_17.5_3d.png"), 0.4, 1.15, 12.5, 5.7, { name: "E_PDF 3d" });
 
 const SIX = ["E_PDF", "B", "A", "P", "H", "A_built"];
@@ -341,6 +341,7 @@ const CR = [["Layout", "Spread, mK\n17.5 / 5 g/s", "Inlet that centres the wall,
 s = content("Coolant flow in 3-D: five layouts at both flows", SEC[3], "The 3-D coolant flow confirms the ranking: E_PDF and B flattest; the jacket's rings feed unevenly");
 s.addTable(CR.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 0.5, y: 1.35, w: 12.3, colW: [3.9, 2.0, 2.7, 1.9, 1.8], rowH: 0.6, border: TB, objectName: "cfd table" });
 bullets(s, [
+  "The 3-D flow resolves the gallery and lane split, so its spreads and Δp differ from the coil table (slide 14), which uses the coolant network: E_PDF 37 vs 43 mK, 14.3 vs 10.7 kPa (friction only).",
   "Grid 0.4 mm in r and z, 2° round; thin channels refined to 0.125 mm (E lanes) and 0.25 mm (H gap); 0.07–0.4 M methanol cells per layout.",
   "Steady laminar flow including the centrifugal and Coriolis effects of the curved channels; then one coupled heat solve of methanol, copper and foam.",
   `The jacket (H) spreads ${f0(cfd("H", 17.5).spread_mK)} mK in 3-D: its rings are fed from one side and do not share the flow evenly.`,
@@ -407,16 +408,16 @@ note(s, "The time-mean convective heat from the vapour CFD (a map over the Zone 
 
 // ================================================================= 05 conclusions
 divider("05", "Conclusions", "What to set, what to build, and what to study next", SEC[5]);
-s = content("Summary: every coil layout holds the inner wall within ±0.15 K", SEC[5], `Design basis: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W; flattest wall with the paired axial sleeve (E_PDF)`);
+s = content("Summary: every coil layout holds the inner wall within ±0.15 K", SEC[5], `Design basis: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W; flattest wall with B and E_PDF (42–43 mK)`);
 stat(s, 0.5, 1.35, 3.0, `${f2(Z1)} W`, "heat into Zone 1 (−30 °C), including the moving vapour column", null, "z1");
 stat(s, 3.65, 1.35, 3.0, `${f2(Z2)} W`, "heat into Zone 2 (−15 °C), including the moving vapour column", null, "z2");
-stat(s, 6.8, 1.35, 3.0, `${f0(best.spread)} mK`, "smallest inner-wall spread: paired axial sleeve E_PDF at 17.5 g/s", null, "best");
+stat(s, 6.8, 1.35, 3.0, `${f0(lay("B", 17.5).spread)}–${f0(best.spread)} mK`, "smallest inner-wall spread: B and E_PDF at 17.5 g/s", null, "best");
 stat(s, 9.95, 1.35, 2.85, `≥ ${f0(minMargin)} mK`, "margin left inside ±0.15 K, worst layout and flow", null, "margin");
 card(s, 0.5, 3.3, 6.05, 3.55, "found card");
 s.addText("What we found", { x: 0.7, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
 bullets(s, [
   `Conduction alone brings ${f2(base.Q1)} W into Zone 1 and ${f2(base.Q2)} W into Zone 2 (50 mm foam, 35 °C lab); ${f0(base.plates * 100)} % enters through the copper end plates.`,
-  `All 11 coil layouts hold ±0.15 K at both 17.5 and 5 g/s, at the right inlet temperature (about −30.1 to −30.3 °C for Zone 1).`,
+  `All 11 coil layouts hold ±0.15 K at both 17.5 and 5 g/s, at the right Zone 1 inlet: −30.09 to −30.15 °C at 17.5 g/s for most layouts (D −30.68 °C, F −30.30 °C).`,
   `The methanol warms ${f0(lay("P", 17.5).rise)} mK through the zone at 17.5 g/s and ${f0(lay("P", 5).rise)} mK at 5 g/s.`,
   `The vapour column turns over in one slow loop and adds about ${f0(-vc.z1)} mW to Zone 1.`,
 ], 0.7, 3.9, 5.7, 2.9, 13, "found list");
@@ -424,20 +425,20 @@ card(s, 6.8, 3.3, 6.0, 3.55, "means card");
 s.addText("What it means for the design", { x: 7.0, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
 bullets(s, [
   "The inlet temperature matters more than the layout: −31.5 °C is too cold for Zone 1 with every layout.",
-  `Lowest spread: E_PDF (${f0(best.spread)} mK), B (${f0(lay("B", 17.5).spread)} mK) and E (${f0(lay("E", 17.5).spread)} mK). The as-built bifilar tube A* is the widest (${f0(lay("A_built", 17.5).spread)} mK), but still inside the band.`,
+  `Lowest spread: B (${f0(lay("B", 17.5).spread)} mK), E_PDF (${f0(best.spread)} mK) and E (${f0(lay("E", 17.5).spread)} mK). The as-built bifilar tube A* is the widest (${f0(lay("A_built", 17.5).spread)} mK), but still inside the band.`,
   "Insulation sets the load: better foam cuts the heat by 27–56 %.",
-  `The vapour column shifts the coil wall by only a few mK and the inlet by 10–20 mK.`,
+  `The vapour column changes the coil wall spread by 0–2.5 mK and needs a 9–19 mK colder inlet.`,
 ], 7.0, 3.9, 5.6, 2.9, 13, "means list");
 
-s = content("Conclusions and next steps", SEC[5], "Any of the 11 layouts works at the right inlet; E_PDF or B for the flattest wall, A* is acceptable as built");
+s = content("Conclusions and next steps", SEC[5], "Any of the 11 layouts works at the right inlet; B or E_PDF for the flattest wall, A* is acceptable as built");
 card(s, 0.5, 1.35, 6.0, 5.4, "conclusions card");
 s.addText("Conclusions", { x: 0.7, y: 1.45, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
 bullets(s, [
   `Design heat load: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W (50 mm foam, 35 °C lab, moving vapour).`,
   `Every layout holds ±0.15 K with at least ${f0(minMargin)} mK to spare, at 17.5 and at 5 g/s.`,
-  "Flattest walls: E_PDF, B and E (≈ 40–45 mK at 17.5 g/s). Widest: A* as built (≈ 100–115 mK).",
-  "Zone 1 inlet ≈ −30.15 °C at 17.5 g/s and −30.3 °C at 5 g/s; −31.5 °C is too cold.",
-  "The vapour column adds ~0.17 W to Zone 1 and moves the coil wall by only a few mK.",
+  "Flattest walls: B, E_PDF and E (42–45 mK at 17.5 g/s). Widest: A* as built (≈ 100–115 mK).",
+  "Zone 1 inlet ≈ −30.15 °C at 17.5 g/s and −30.3 °C at 5 g/s (D −30.68 °C, F −30.30 °C); −31.5 °C is too cold.",
+  "The vapour column adds ~0.17 W to Zone 1 and changes the coil wall spread by 0–2.5 mK.",
 ], 0.7, 1.95, 5.6, 4.7, 13, "conclusions list");
 card(s, 6.8, 1.35, 6.0, 5.4, "next card");
 s.addText("Next steps", { x: 7.0, y: 1.45, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
