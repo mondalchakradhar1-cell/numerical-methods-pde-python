@@ -205,5 +205,5 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   mean + instant, 0–120 s GIF, heat flows, Perspex coupling, deck comparison, coil effect), limits and next steps.
 - 08:20 UTC — **full deck and archive**: `SAHA_revalidation_FULL.pptx` (96 slides: main deck + appendix with all 22 result
   sheets, every coolant CFD case at both flows with tracer animations, extra wall maps/profiles, work-log timeline) and
-  `SAHA_revalidation_all.zip` (inputs, code, all results incl. vapour runs, figures, both decks, work log, README).
-  Both are too large for the git branch (98 MB / 437 MB) and are delivered as files; the code and main deck are on the branch.
+  `SAHA_revalidation_all.7z.001–.015` (7-Zip volumes, 28 MB each: inputs, code, all results incl. vapour runs, figures, both decks, work log, README) and `SAHA_revalidation_lite.zip` (29 MB: code, numbers, PNG figures, sheets PDF, log).
+  Upload limit is 30 MB per file, hence the volumes. The code and the main deck are on the git branch.
