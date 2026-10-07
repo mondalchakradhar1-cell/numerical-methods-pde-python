@@ -228,6 +228,25 @@ const PR = [["Heat loss is …", "to", "Check with the chamber model"],
 s.addTable(PR.map((r, i) => i === 0 ? r.map(HDR) : [TD(r[0], { bold: true, color: r[0].startsWith("inv") ? "B4471A" : "138A5E" }), TD(r[1]), TD(r[2], { fontSize: 10 })]),
   { x: 6.9, y: 1.3, w: 5.95, colW: [1.45, 1.95, 2.55], rowH: 0.7, border: TB, objectName: "proportionality table" });
 
+const EQ = JSON.parse(fs.readFileSync(path.join(path.dirname(SUMMARY), "insulation_equivalent.json"), "utf8"));
+s = content("Other insulation materials: thickness for the same effect as 50 mm foam", SEC[1], `Same Zone 1 heat (${f2(EQ.target_Q1)} W): PU needs 19 mm, aerogel 7 mm; mineral wool 71 mm, cork 99 mm, wood about 560 mm`);
+const EM = EQ.materials;
+s.addChart(pres.charts.BAR, [
+  { name: "chamber model (same Zone 1 heat)", labels: EM.map((m) => m.name.replace(" (design)", "")), values: EM.map((m) => +m.t_z1.toFixed(1)) },
+  { name: "flat-wall rule t = 50 mm × k / 0.035", labels: EM.map((m) => m.name.replace(" (design)", "")), values: EM.map((m) => +m.t_flat.toFixed(1)) },
+], { x: 0.4, y: 1.15, w: 6.3, h: 5.7, barDir: "bar", barGapWidthPct: 35, chartColors: [HEX.accent1, "9AA5B4"], showValue: true, dataLabelFontSize: 9, dataLabelFormatCode: "0",
+  catAxisLabelFontSize: 10, catAxisOrientation: "maxMin", valAxisLabelFontSize: 9, valAxisMinVal: 0, valAxisMaxVal: 110, showLegend: true, legendPos: "b", legendFontSize: 10,
+  valAxisTitle: "insulation thickness, mm", showValAxisTitle: true, valAxisTitleFontSize: 10, valGridLine: { color: "E5E9EF", size: 0.5 }, objectName: "equivalent thickness chart" });
+const ET = [["Material", "k, W/m·K", "Same Zone 1, mm", "Same Zone 2, mm", "Outside Ø, mm"]];
+EM.forEach((m) => ET.push([TD(m.name, { bold: m.name.includes("design"), fontSize: 9.5 }), TD(m.k.toFixed(3), { fontSize: 9.5, align: "center" }),
+  TD(f0(m.t_z1), { fontSize: 9.5, align: "center", bold: true, color: HEX.accent1 }), TD(f0(m.t_z2), { fontSize: 9.5, align: "center" }), TD(f0(m.outer_d_mm), { fontSize: 9.5, align: "center" })]));
+ET.push([TD(EQ.wood.name, { fontSize: 9.5 }), TD(EQ.wood.k.toFixed(3), { fontSize: 9.5, align: "center" }), TD(`≈ ${f0(EQ.wood.t_sidewall)}*`, { fontSize: 9.5, align: "center", bold: true, color: HEX.accent1 }),
+  TD("–", { fontSize: 9.5, align: "center" }), TD(`≈ ${f0(2 * (43 + EQ.wood.t_sidewall))}`, { fontSize: 9.5, align: "center" })]);
+s.addTable(ET.map((r, i) => i === 0 ? r.map((c) => ({ text: c, options: Object.assign(HDR(c).options, { fontSize: 9.5 }) })) : r),
+  { x: 6.95, y: 1.2, w: 5.9, colW: [2.3, 0.85, 0.95, 0.95, 0.85], rowH: 0.36, border: TB, objectName: "equivalent table" });
+note(s, "The material replaces all the insulation, including the filling between the copper end plates; thickness is added beyond the plates and above the cap. A cylinder's resistance grows with ln(r_o/r_i), so a better material needs much less than the flat-wall rule and a poorer one much more. * Wood: side-wall formula only.",
+  6.95, 5.55, 5.9, 1.3, 9.5);
+
 s = content("Heat against insulation thickness, both zones", SEC[1], `Doubling the foam from 50 to 100 mm cuts Zone 1 only from 2.58 to 2.02 W: a better foam beats more thickness`);
 addFit(s, fig("hl_thickness.png"), 0.4, 1.2, 12.5, 5.6, { name: "thickness" });
 s = content("Heat against foam thermal conductivity, both zones", SEC[1], "At 50 mm: PU (k 0.025) cuts the heat by 27 %, aerogel (k 0.015) by 56 %");

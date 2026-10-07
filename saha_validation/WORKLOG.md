@@ -346,3 +346,22 @@ At the user's request I checked both files for statements that contradict each o
 - **Inlet range.** "−30.1 to −30.3 °C for all layouts" ignored D (−30.68) and F (−30.30); the exceptions are now stated. The briefing range "−30.12 to −30.31" is corrected to −30.09 to −30.15 °C at 17.5 g/s and −30.24 to −30.33 °C at 5 g/s.
 - **Vapour effect on the inlet.** "10–20 mK" and "a few mK" are unified to 9–19 mK colder inlet and a 0–2.5 mK spread change.
 - **Slide count.** The briefing's "short deck (25 slides)" now says 30.
+
+## 7 Oct: equivalent thickness of other insulation materials
+
+`insulation_equivalent.py` → `results/insulation_equivalent.json`. For each material the chamber model's foam conductivity is replaced everywhere, including the filling between the end plates. A bisection then finds the thickness beyond the plates and cap that gives the same Zone 1 heat as 50 mm EPS (2.579 W), and separately the same Zone 2 heat (1.809 W).
+
+| Material | k, W/m·K | Same Zone 1, mm | Same Zone 2, mm | Flat-wall rule, mm |
+|---|---|---|---|---|
+| VIP | 0.007 | 1.3 | 1.7 | 10 |
+| Aerogel | 0.015 | 7.1 | 9.1 | 21 |
+| PIR/PU | 0.023 | 18.7 | 22.4 | 33 |
+| XPS | 0.033 | 43.3 | 44.9 | 47 |
+| EPS | 0.035 | 50 | 50 | 50 |
+| Armaflex | 0.036 | 53.7 | 52.6 | 51 |
+| Mineral wool / PE | 0.040 | 70.8 | 63.5 | 57 |
+| Cork | 0.045 | 99.4 | 77.9 | 64 |
+
+Wood (k 0.12) needs ≈ 560 mm by the side-wall formula; the model grid is too large for it.
+
+The cylinder's ln(r_o/r_i) law makes better materials need much less than the flat-wall rule t = 50·k/0.035, and poorer ones much more. This is now slide 7 of the short deck (31 slides).
