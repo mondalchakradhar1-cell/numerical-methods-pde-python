@@ -39,9 +39,9 @@ for j, (z, nm, col) in enumerate(Z):
         for sp in b.spines.values(): sp.set_visible(False)
 for i, (im, lab) in enumerate(((im0, "T − section mean (K)"), (im1, "w (m/s), up +"), (im2, "w (m/s), up +"))):
     fig.colorbar(im, ax=ax[i, :].tolist(), fraction=0.015, pad=0.01, label=lab)
-fig.text(0.01, 0.84, "t = 120 s\ntemperature\n+ in-plane\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
-fig.text(0.01, 0.53, "t = 120 s\nvertical\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
-fig.text(0.01, 0.21, "time mean\n85–120 s\nvertical\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
+fig.text(0.01, 0.84, f"t = {float(c['t']):.0f} s\ntemperature\n+ in-plane\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
+fig.text(0.01, 0.53, f"t = {float(c['t']):.0f} s\nvertical\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
+fig.text(0.01, 0.21, "time mean\n" + os.environ.get("MEAN_LABEL", "85–120 s") + "\nvertical\nvelocity", fontsize=11, weight="bold", color="#13294B", va="center")
 fig.subplots_adjust(left=0.09, right=0.9, top=0.93, bottom=0.03, wspace=0.08, hspace=0.18)
 fig.savefig(out, dpi=150)
 print(out)

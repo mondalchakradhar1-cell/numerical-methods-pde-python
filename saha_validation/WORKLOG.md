@@ -407,3 +407,12 @@ Means over 85–120 s:
 Not yet steady: the liquid's heat capacity is about 420 J/K and it was still cooling at −3.1 W at 115 s. The run is being continued from the 120 s checkpoint to 480 s (`results/liquid_run_b`) to get the steady loads.
 
 Figures in `figs/liquid/`: 0–120 s GIF (slowed), time-mean frame, 3-D four-panel, streamlines, sections, heat-flow history. `render3d.py` and `heatflow_fig.py` take `FLUID_LABEL` for their labels.
+
+**Setup C, steady state** (continued from the 120 s checkpoint to 480 s; means over 420–480 s; storage −0.08 W) → `results/liquid_steady.json`:
+- Liquid → Zone 1 wall: 11.20 W (±0.13 W over 10 s blocks).
+- Zone 2 wall → liquid: 8.68 W (±0.11).
+- Ice tray: 2.01 W; lower connector: 0.36 W; middle connector: 0.08 W.
+- Zone totals with conduction through the insulation: Zone 1 = 2.65 + 11.20 = **13.85 W** to remove. Zone 2 = 1.62 − 8.68 = **−7.06 W**, i.e. 7.1 W of heating needed.
+- Region means: −18.8 / −19.8 / −21.7 / −23.4 / −3.8 °C.
+
+Figures: `figs/liquid/liquid_heatflow_0_480.png`, `liquid_sections_steady.png`, `liquid_mean_steady.png`. `heatflow_fig.py` takes the W0/W1 window; `sections.py` labels follow the run.
