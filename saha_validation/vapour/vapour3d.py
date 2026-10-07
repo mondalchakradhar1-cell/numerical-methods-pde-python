@@ -25,6 +25,16 @@ sys.path.insert(0, HERE)
 
 RHO, CP, KV, MU, BETA = 4.2254, 786.6, 0.009788, 1.0041e-5, 3.874e-3
 NU, ALPHA, G = MU / RHO, KV / (RHO * CP), 9.81
+# liquid R134a, saturated-liquid properties at -15 C (column mean); held at 600 kPa so it stays subcooled everywhere
+# (T_sat(600 kPa) = +21.6 C, above every wall the liquid touches): any bubble collapses in the colder liquid above it
+LIQUID = dict(RHO=1327.0, CP=1300.0, KV=0.0985, MU=3.25e-4, BETA=2.3e-3)
+
+
+def set_fluid(name):
+    global RHO, CP, KV, MU, BETA, NU, ALPHA
+    if name == "liquid":
+        RHO, CP, KV, MU, BETA = (LIQUID[k] for k in ("RHO", "CP", "KV", "MU", "BETA"))
+        NU, ALPHA = MU / RHO, KV / (RHO * CP)
 T_REF = -15.0
 R, H = 13.5e-3, 423.5e-3
 RELAX = 0.5
@@ -601,7 +611,10 @@ if __name__ == "__main__":
     ap.add_argument("--dx", type=float, default=1.0); ap.add_argument("--out", default=None)
     ap.add_argument("--w1", default="25,60"); ap.add_argument("--w2", default="85,120"); ap.add_argument("--restart", default=None)
     ap.add_argument("--top_from_conduction", action="store_true"); ap.add_argument("--cap_adiabatic", action="store_true")
+    ap.add_argument("--fluid", default="vapour", choices=["vapour", "liquid"])
     a = ap.parse_args()
+    set_fluid(a.fluid)
+    print(f"fluid {a.fluid}: rho {RHO} cp {CP} k {KV} mu {MU} beta {BETA}  nu {NU:.3e} alpha {ALPHA:.3e}", flush=True)
     CAP_ADIABATIC[0] = a.cap_adiabatic
     run(a.t_end, a.t_couple, a.dx, out=a.out, win1=tuple(map(float, a.w1.split(","))), win2=tuple(map(float, a.w2.split(","))),
         restart=a.restart, top_from_conduction=a.top_from_conduction)
