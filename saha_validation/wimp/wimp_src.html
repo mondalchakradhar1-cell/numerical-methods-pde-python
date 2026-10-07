@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SAHA as a WIMP bubble chamber</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  :root { --navy: #13294B; --copper: #B87333; --card: #EEF3F8; --grey: #6B7280; --ink: #1A1F2B; }
+  body { font-family: Calibri, Carlito, "Liberation Sans", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.42; margin: 0; }
+  h1, h2, h3 { font-family: Cambria, Caladea, "Liberation Serif", Georgia, serif; color: var(--navy); }
+  h1 { font-size: 23pt; margin: 0 0 4pt; }
+  h2 { font-size: 15pt; margin: 14pt 0 6pt; padding-bottom: 3pt; border-bottom: 2px solid var(--copper); break-after: avoid; }
+  h3 { font-size: 12pt; margin: 10pt 0 4pt; break-after: avoid; }
+  .pb { break-before: page; }
+  .cover { background: var(--navy); color: #fff; padding: 20pt; border-radius: 6pt; margin-bottom: 10pt; }
+  .cover h1 { color: #fff; } .cover p { color: #C9D3E0; margin: 4pt 0 0; }
+  .result { background: var(--navy); color: #fff; font-weight: bold; padding: 6pt 10pt; border-radius: 4pt; margin: 6pt 0 8pt; break-inside: avoid; }
+  .card { background: var(--card); border-radius: 5pt; padding: 8pt 11pt; margin: 7pt 0; break-inside: avoid; }
+  .card b:first-child { color: var(--copper); }
+  table { border-collapse: collapse; width: 100%; font-size: 9.3pt; margin: 6pt 0; }
+  tr { break-inside: avoid; }
+  th { background: var(--navy); color: #fff; text-align: left; padding: 3pt 5pt; }
+  td { padding: 2.5pt 5pt; border-bottom: 0.5pt solid #D5DCE4; }
+  tr:nth-child(even) td { background: #F7F9FC; }
+  td.n, th.n { text-align: right; }
+  img { width: 100%; display: block; margin: 6pt 0 2pt; }
+  .cap { font-size: 8.8pt; color: var(--grey); margin-bottom: 8pt; }
+  figure { margin: 0; break-inside: avoid; }
+  ol, ul { margin: 3pt 0 3pt 16pt; padding: 0; } li { margin: 2pt 0; }
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6pt; margin: 8pt 0; }
+  .step { background: var(--card); border-radius: 5pt; padding: 7pt; font-size: 9.2pt; }
+  .step b { display: block; color: var(--copper); font-family: Cambria, Georgia, serif; font-size: 11pt; margin-bottom: 2pt; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>SAHA as a WIMP bubble chamber</h1>
+  <p>What the cold stage is for, how a superheated-R134a chamber detects dark-matter WIMPs, the signal it would see, and what that requires of the chamber.</p>
+  <p>7 Oct 2026 · properties: CoolProp reference equation of state for R134a · halo: standard halo model</p>
+</div>
+
+<div class="result">The cold zones set the vapour pressure above a superheated R134a liquid. A WIMP hitting a fluorine nucleus leaves a few-keV recoil; above the bubble threshold this grows into a visible bubble, whose vapour then condenses at the −30 °C zone and resets the chamber.</div>
+
+<h2>1 · What the chamber is</h2>
+<div class="flow">
+  <div class="step"><b>1 Superheated liquid</b>R134a liquid in the lower chamber, warmer than its boiling point at the chamber pressure. It stays liquid (metastable) until something deposits energy.</div>
+  <div class="step"><b>2 Particle hit</b>A WIMP (or neutron) scatters on a nucleus, which recoils with a few to ~100 keV and stops within ~0.05 µm.</div>
+  <div class="step"><b>3 Bubble</b>If that energy exceeds the threshold E<sub>c</sub> within the critical radius r<sub>c</sub>, a bubble forms and grows to mm size. Cameras and acoustic sensors record it.</div>
+  <div class="step"><b>4 Vapour rises</b>The bubble's vapour rises through the bore. The liquid supplies its latent heat (13 mJ for a 1 mm bubble).</div>
+  <div class="step"><b>5 Condense, reset</b>The −30 °C Zone 1 condenses the vapour back to liquid and holds the vapour pressure at 84.4 kPa. The −15 °C Zone 2 grades the temperature between them.</div>
+</div>
+<p>This is the principle of the PICO / COUPP dark-matter bubble chambers (C<sub>3</sub>F<sub>8</sub>, CF<sub>3</sub>I) and of the vapour-condensing "geyser" designs. The cold zones are the pressure reference and the condenser, which is why their temperature is held to ±0.15 K.</p>
+
+<h2>2 · Why R134a (C<sub>2</sub>H<sub>2</sub>F<sub>4</sub>) is a WIMP target</h2>
+<table>
+<tr><th>Nucleus</th><th class="n">Atoms per molecule</th><th class="n">Mass fraction</th><th>Spin</th><th>Sensitivity</th></tr>
+<tr><td><b>¹⁹F</b></td><td class="n">4</td><td class="n">74.5 %</td><td>1/2, ⟨S<sub>p</sub>⟩ = 0.441</td><td>spin-dependent WIMP–proton coupling: the strongest of any common target nucleus</td></tr>
+<tr><td>¹H</td><td class="n">2</td><td class="n">2.0 %</td><td>1/2, ⟨S<sub>p</sub>⟩ = 0.5</td><td>spin-dependent, light WIMPs (small mass fraction)</td></tr>
+<tr><td>¹²C</td><td class="n">2</td><td class="n">23.5 %</td><td>0</td><td>spin-independent only (weak, A = 12)</td></tr>
+</table>
+<p>Fluorine-rich superheated liquids lead the world in sensitivity to spin-dependent WIMP–proton scattering. R134a carries almost as much fluorine per kilogram as C<sub>3</sub>F<sub>8</sub> (74.5 % against 81 %).</p>
+
+<h2 class="pb">3 · The signal a WIMP leaves</h2>
+<figure><img src="../figs/wimp_spectra.png"><div class="cap">Recoil spectra in R134a for four WIMP masses. ρ<sub>χ</sub> = 0.3 GeV/cm³, v<sub>0</sub> = 220 km/s, v<sub>E</sub> = 232 km/s, v<sub>esc</sub> = 544 km/s. Spin-dependent from ¹⁹F and ¹H; spin-independent from all three nuclei.</div></figure>
+<figure><img src="../figs/wimp_rate_vs_threshold.png"><div class="cap">Expected events per kg per year above the bubble threshold. Dashed: 3 and 10 keV.</div></figure>
+<table>
+<tr><th>WIMP mass</th><th class="n">E<sub>c</sub> = 3 keV</th><th class="n">E<sub>c</sub> = 10 keV</th><th class="n">E<sub>c</sub> = 20 keV</th></tr>
+<tr><td>10 GeV</td><td class="n">1.6</td><td class="n">0.25</td><td class="n">0.01</td></tr>
+<tr><td>30 GeV</td><td class="n">2.2</td><td class="n">1.3</td><td class="n">0.54</td></tr>
+<tr><td>100 GeV</td><td class="n">1.3</td><td class="n">0.95</td><td class="n">0.60</td></tr>
+<tr><td>1000 GeV</td><td class="n">0.17</td><td class="n">0.14</td><td class="n">0.10</td></tr>
+</table>
+<div class="card"><b>Reading.</b> Spin-dependent events per kg of R134a per year at σ<sub>p</sub> = 10⁻⁴⁰ cm². Current limits are about 3 × 10⁻⁴¹ cm², so a real signal is ≲ 1 event per kg per year. Light WIMPs (≤ 10 GeV) need a threshold of 3 keV or lower. A dark-matter search needs tens to hundreds of kg-years, deep underground, with neutron shielding.</div>
+
+<h2 class="pb">4 · Setting the threshold: liquid temperature and pressure</h2>
+<figure><img src="../figs/wimp_threshold_map.png"><div class="cap">Left: Seitz threshold E<sub>c</sub> = 4πr<sub>c</sub>²(σ − T∂σ/∂T) + (4/3)πr<sub>c</sub>³ρ<sub>v</sub>h<sub>fg</sub> − (4/3)πr<sub>c</sub>³Δp with r<sub>c</sub> = 2σ/Δp. Right: the energy density needed (E<sub>c</sub> over 6 r<sub>c</sub>) against what electrons from gamma rays deposit.</div></figure>
+<table>
+<tr><th>Liquid at</th><th class="n">Superheat at 84.4 kPa</th><th class="n">Critical radius</th><th class="n">Threshold E<sub>c</sub></th><th class="n">dE/dx needed</th><th>WIMP use</th></tr>
+<tr><td>0 °C (ice bath)</td><td class="n">30 K</td><td class="n">110 nm</td><td class="n">139 keV</td><td class="n">211 keV/µm</td><td>too high: misses almost all WIMP recoils</td></tr>
+<tr><td>10 °C</td><td class="n">40 K</td><td class="n">61 nm</td><td class="n">35 keV</td><td class="n">96 keV/µm</td><td>heavy WIMPs only</td></tr>
+<tr><td>20 °C</td><td class="n">50 K</td><td class="n">36 nm</td><td class="n">10 keV</td><td class="n">48 keV/µm</td><td>usable, ≥ 30 GeV</td></tr>
+<tr><td>30 °C</td><td class="n">60 K</td><td class="n">22 nm</td><td class="n">3.2 keV</td><td class="n">25 keV/µm</td><td>good, down to ~10 GeV</td></tr>
+</table>
+<div class="card"><b>Gamma blindness.</b> Electrons from gamma rays deposit about 0.26 keV/µm, 100–1000 times less than the energy density needed above. Nuclear recoils deposit 100–1000 keV/µm. Over this whole range the chamber bubbles on WIMPs and neutrons but stays blind to the gamma background. This is the main strength of a bubble chamber.</div>
+
+<h2 class="pb">5 · What it means for the cold stage</h2>
+<figure><img src="../figs/wimp_condenser.png"><div class="cap">Left: threshold against the condenser temperature, which sets the vapour pressure, for four liquid temperatures. Right: how strongly the threshold moves with the liquid temperature (per K) and over the ±0.15 K band of Zone 1.</div></figure>
+<ol>
+  <li><b>The liquid must be warm, not at 0 °C.</b> With the liquid at 0 °C the threshold cannot fall below 65 keV even with a −60 °C condenser (139 keV at −30 °C). For a WIMP search the liquid should sit at about 20–30 °C (10–3 keV) with the condenser at −30 °C.</li>
+  <li><b>Zone 1 sets the pressure.</b> At −30 °C the R134a vapour pressure rises 4.0 kPa per K. The ±0.15 K band holds it within ±0.6 kPa, which moves the threshold by only 0.2–0.8 %. The ±0.15 K requirement is therefore more than enough for threshold stability.</li>
+  <li><b>The liquid temperature is the sensitive control.</b> The threshold changes by 11–15 % per K of liquid temperature, so the liquid needs a stability of about ±0.1 K to hold the threshold to ±1–2 %.</li>
+  <li><b>Bubbles hardly load the condenser.</b> A 1 mm bubble returns 13 mJ to Zone 1 when it condenses. Even one event per second would add 0.013 W against the 2.7 W conduction load.</li>
+  <li><b>The steady load is the liquid surface.</b> The liquid–vapour surface sits at the saturation temperature (−30 °C at 84.4 kPa). Warm liquid below it drives a continuous evaporate-and-condense loop that Zone 1 must absorb. Its size depends on the lower chamber's shape and the liquid level.</li>
+</ol>
+
+<h2>6 · To build the full chamber model</h2>
+<div class="card"><b>Needed.</b> The lower chamber geometry (cone/reservoir shape, wall material and thickness), the liquid level, the liquid temperature control (bath at 20–30 °C or ice bath), and whether the pressure is set only by Zone 1. With these, the chamber heat model and the 3-D vapour column extend through the liquid. That gives the steady evaporation load on Zone 1, the temperature field of the liquid (hence the threshold map across the active volume), and the transient after a bubble.</div>
+
+</body>
+</html>

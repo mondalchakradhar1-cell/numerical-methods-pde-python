@@ -365,3 +365,17 @@ At the user's request I checked both files for statements that contradict each o
 Wood (k 0.12) needs ≈ 560 mm by the side-wall formula; the model grid is too large for it.
 
 The cylinder's ln(r_o/r_i) law makes better materials need much less than the flat-wall rule t = 50·k/0.035, and poorer ones much more. This is now slide 7 of the short deck (31 slides).
+
+## 7 Oct: R134a superheat, bubble energy and the WIMP bubble-chamber interpretation
+
+The user clarified the chamber: superheated R134a liquid sits in the lower chamber, below the z = 0 cut; the vapour column and the cold zones are above it. This makes it a bubble chamber for WIMP dark matter. The trial run with liquid filling the bore was stopped as the wrong setup. The full-body model needs the lower chamber geometry, liquid level and bath details, which have been requested.
+
+- `r134a_superheat.py`: saturation pressure for 25–35 °C (665–887 kPa) and the liquid superheat at several pressures. At 84.4 kPa it is 55–65 K.
+- `r134a_bubble_energy.py`: Seitz threshold E_c and critical radius r_c, plus the energy to grow a bubble. At 30 °C and 400 kPa: r_c = 40 nm, E_c = 16 keV; a 1 mm bubble takes 13 mJ.
+- `wimp_bubble.py` → `figs/wimp_*.png`, `results/wimp_bubble.json`:
+  - WIMP recoil spectra in R134a (SHM; spin-dependent on ¹⁹F/¹H, spin-independent).
+  - Rate above threshold. Cross-check against PICO-60: about 1.8 against 2.2 events/kg/yr at σ_p = 10⁻⁴⁰ cm².
+  - Gamma-blind window: electrons give 0.26 keV/µm against 25–560 keV/µm needed.
+  - With pressure set by Zone 1 (84.4 kPa): liquid at 0 °C gives E_c = 139 keV (≥ 65 keV even with a −60 °C condenser); 20 °C gives 10 keV; 30 °C gives 3.2 keV.
+  - dp/dT at −30 °C is 4.0 kPa/K, so ±0.15 K moves E_c by only 0.2–0.8 %. The threshold is far more sensitive to the liquid temperature: 11–15 %/K.
+- `wimp/SAHA_WIMP_bubble_chamber.pdf`: 4-page write-up.
