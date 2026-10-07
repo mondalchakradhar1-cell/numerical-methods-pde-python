@@ -391,3 +391,19 @@ The user clarified the chamber: superheated R134a liquid sits in the lower chamb
   - Setup A: R(1 ms) = 0.7–1.3 mm. After 30–100 mm of rise the bubble is 8.5–23 mm in radius and carries 2.5–48 J to Zone 1, which warms the Zone 1 copper by 4–75 mK per event. Bubbles grow larger than the bore, giving geyser-like events.
   - Setup C (400 kPa, 30 °C): bubbles of 2–3 mm, 0.1–0.5 J.
 - `bubble/bubble_anim.py` → `figs/bubble_event.gif` (setup A, liquid 20 °C, 60 mm of liquid): nucleation, growth while rising, the vapour slug reaching Zone 1. 17.7 J per event, +28 mK on the Zone 1 copper.
+
+## 7 Oct: setup C (pressurised, liquid-filled chamber), coupled 0–120 s
+
+The user confirmed setup C: the chamber is completely full of liquid R134a. The warm lower part is the superheated, bubble-sensitive volume; the bore through the cold zones holds subcooled liquid. Keeping both zones insensitive needs p > p_sat(−15 °C) = 164 kPa.
+
+Run `vapour3d.py --fluid liquid` → `results/liquid_run` (git-ignored). Liquid R134a properties at −15 °C; same walls, room coupling and schedule as the vapour run; 0 °C bottom; 30 446 steps, 47 min.
+
+Means over 85–120 s:
+- Zone 1 wall takes 12.68 W from the liquid (vapour: 0.17 W).
+- Zone 2 wall gives 6.84 W to the liquid. The liquid mixes to about −19 °C, below Zone 2's −15 °C, so Zone 2 would need heating.
+- The ice tray gives 1.87 W; the lower connector 0.33 W.
+- Region means: −17.6 / −18.7 / −20.9 / −22.6 / −4.0 °C; w about 0.01 m/s rms.
+
+Not yet steady: the liquid's heat capacity is about 420 J/K and it was still cooling at −3.1 W at 115 s. The run is being continued from the 120 s checkpoint to 480 s (`results/liquid_run_b`) to get the steady loads.
+
+Figures in `figs/liquid/`: 0–120 s GIF (slowed), time-mean frame, 3-D four-panel, streamlines, sections, heat-flow history. `render3d.py` and `heatflow_fig.py` take `FLUID_LABEL` for their labels.

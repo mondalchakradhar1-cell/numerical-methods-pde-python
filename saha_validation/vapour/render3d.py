@@ -12,6 +12,7 @@ SR = 2.5                       # radial exaggeration
 R_MM, H_MM = 13.5, 423.5
 CMAP = "coolwarm"
 CLIM = (-30, 0)
+FLUID = os.environ.get("FLUID_LABEL", "vapour")
 
 
 def grid_from(T, xc, zc, sec):
@@ -83,7 +84,7 @@ def render_midplane(p, T, xc, zc, sec, bar=False):
     g = grid_from(T, xc, zc, sec)
     sl = g.slice(normal="y", origin=(0, 0.01, 0)).threshold(-1e9, scalars="T")
     p.add_mesh(sl, scalars="T", cmap=CMAP, clim=CLIM, lighting=False, show_scalar_bar=bar,
-               scalar_bar_args=dict(title="vapour T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
+               scalar_bar_args=dict(title=f"{FLUID} T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
                                     color="black", title_font_size=12, label_font_size=10, n_labels=7))
 
 
@@ -108,7 +109,7 @@ def frame(snap, P_hist, xc, zc, sec, fname, title):
     p.subplot(0, 0)
     scenery(p, cut=True)
     p.add_mesh(midplane_mesh(snap["Tmid"].astype(float), xc, zc, sec, "T"), scalars="T", cmap=CMAP, clim=CLIM, lighting=False,
-               scalar_bar_args=dict(title="vapour T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
+               scalar_bar_args=dict(title=f"{FLUID} T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
                                     color="black", title_font_size=12, label_font_size=10, n_labels=7))
     camera(p)
     p.add_text("temperature, mid-plane", position="upper_edge", font_size=11, color="black")
@@ -189,7 +190,7 @@ def streamlines_figure(run, fname):
     uc = 0.5 * (ck["u"][1:] + ck["u"][:-1]); vc = 0.5 * (ck["v"][:, 1:] + ck["v"][:, :-1]); wc = 0.5 * (ck["w"][:, :, 1:] + ck["w"][:, :, :-1])
     p = pv.Plotter(off_screen=True, window_size=(1700, 1250), shape=(1, 3), border=False)
     p.set_background("white")
-    bar = dict(title="vapour T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5, color="black",
+    bar = dict(title=f"{FLUID} T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5, color="black",
                title_font_size=12, label_font_size=10, n_labels=7)
     p.subplot(0, 0); scenery(p)
     st = stream_mesh(m["T"].astype(float), m["u"], m["v"], m["w"], xc, zc, sec)

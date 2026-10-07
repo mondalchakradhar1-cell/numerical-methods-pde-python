@@ -2,6 +2,7 @@
 """Heat into the vapour (sources) and from the vapour into the copper, 0-120 s, smoothed over 1 s;
 time means over 85-120 s drawn as bars.     python heatflow_fig.py <history.json> <out png>"""
 import json
+import os
 import sys
 
 import matplotlib
@@ -46,7 +47,7 @@ for i, a in enumerate(ax):
     for mv, col in sorted(labs[i]):
         y = mv if not ys_ or mv - ys_[-1] > 5 else ys_[-1] + 5
         ys_.append(y); a.text(121, y, f"{mv:.0f}", color=col, va="center", fontsize=10, weight="bold")
-for a, ttl in zip(ax, ("Heat INTO the vapour (sources), mW", "Heat from the vapour INTO the copper, mW")):
+for a, ttl in zip(ax, (f"Heat INTO the {os.environ.get('FLUID_LABEL', 'vapour')} (sources), mW", f"Heat from the {os.environ.get('FLUID_LABEL', 'vapour')} INTO the copper, mW")):
     a.axvspan(w0, 120, color="#f0f0f0", zorder=0); a.axvline(60, color="0.5", ls="--", lw=0.8)
     a.text(59, a.get_ylim()[0] + 0.1 * (a.get_ylim()[1] - a.get_ylim()[0]), "walls coupled\nto the room →", fontsize=8.5, color="0.4", ha="right")
     a.text((w0 + 120) / 2, a.get_ylim()[0] + 0.03 * (a.get_ylim()[1] - a.get_ylim()[0]), "time-mean window", fontsize=8.5, color="0.4", ha="center")
