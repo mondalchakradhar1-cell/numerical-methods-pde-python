@@ -157,10 +157,11 @@ s.addText("How much heat reaches each copper zone, which coil layout holds the i
 
 s = content("The cold stage: two copper zones on one open vapour bore", SEC[0], "Each copper zone must hold its inner wall within ±0.15 K of its set point; the coil removes the heat that leaks in from the lab");
 addFit(s, fig("chamber_schematic.png"), 0.35, 1.05, 5.6, 5.9, { name: "chamber schematic" });
+const NI = JSON.parse(fs.readFileSync(path.join(path.dirname(SUMMARY), "heatload_noinsulation.json"), "utf8"));
 const ZC = [
   ["Zone 1 · copper, z 247–365 mm", HEX.accent1, [`Set point −30 °C ± 0.15 K (wall −30.15 to −29.85 °C)`, `Length 118 mm = 11 plate + 96 coil + 11 plate`, `Heat to remove ≈ ${f2(Z1)} W (${f2(base.Q1)} W conduction ${sgn(Z1 - base.Q1, 2)} W net from the moving vapour)`]],
   ["Zone 2 · copper, z 60–187 mm", HEX.accent1, [`Set point −15 °C ± 0.15 K (wall −15.15 to −14.85 °C)`, `Length 127 mm = 11 plate + 105 coil + 11 plate`, `Heat to remove ≈ ${f2(Z2)} W (${f2(base.Q2)} W conduction ${sgn(Z2 - base.Q2, 2)} W net from the moving vapour)`]],
-  ["Around them", HEX.dk2, ["Perspex connectors 60 mm below, between and above the zones; flat Perspex cap at 425 mm", "R134a vapour in a Ø27 mm bore open from the 0 °C ice tray to the cap", "50 mm foam (k 0.035) to a 35 °C lab, h = 8 W/m²K; coolant methanol at 17.5 or 5 g/s"]],
+  ["Heat leak: with and without insulation", HEX.dk2, [`No insulation (bare copper in 35 °C air, h = 8): Zone 1 ≈ ${f0(NI.bare.Q1)} W, Zone 2 ≈ ${f0(NI.bare.Q2)} W`, `Outer foam removed (filling between the plates kept): ${f1(NI.no_outer_foam.Q1)} W and ${f1(NI.no_outer_foam.Q2)} W`, `50 mm foam (k 0.035): ${f2(base.Q1)} W and ${f2(base.Q2)} W by conduction, about 8× less than bare`]],
 ];
 ZC.forEach(([t, col, items], i) => {
   const y = 1.2 + i * 1.92;
@@ -168,28 +169,6 @@ ZC.forEach(([t, col, items], i) => {
   s.addText(t, { x: 6.4, y: y + 0.08, w: 6.2, h: 0.4, fontFace: "Cambria", fontSize: 15, bold: true, color: col, isTextBox: true, margin: 0 });
   bullets(s, items, 6.4, y + 0.5, 6.25, 1.25, 11.5, `zone list ${i}`);
 });
-
-s = content("Every coil layout holds the inner wall within ±0.15 K", SEC[0], `Design basis: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W; flattest wall with the paired axial sleeve (E_PDF)`);
-stat(s, 0.5, 1.35, 3.0, `${f2(Z1)} W`, "heat into Zone 1 (−30 °C), including the moving vapour column", null, "z1");
-stat(s, 3.65, 1.35, 3.0, `${f2(Z2)} W`, "heat into Zone 2 (−15 °C), including the moving vapour column", null, "z2");
-stat(s, 6.8, 1.35, 3.0, `${f0(best.spread)} mK`, "smallest inner-wall spread: paired axial sleeve E_PDF at 17.5 g/s", null, "best");
-stat(s, 9.95, 1.35, 2.85, `≥ ${f0(minMargin)} mK`, "margin left inside ±0.15 K, worst layout and flow", null, "margin");
-card(s, 0.5, 3.3, 6.05, 3.55, "found card");
-s.addText("What we found", { x: 0.7, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
-bullets(s, [
-  `Conduction alone brings ${f2(base.Q1)} W into Zone 1 and ${f2(base.Q2)} W into Zone 2 (50 mm foam, 35 °C lab); ${f0(base.plates * 100)} % enters through the copper end plates.`,
-  `All 11 coil layouts hold ±0.15 K at both 17.5 and 5 g/s, at the right inlet temperature (about −30.1 to −30.3 °C for Zone 1).`,
-  `The methanol warms ${f0(lay("P", 17.5).rise)} mK through the zone at 17.5 g/s and ${f0(lay("P", 5).rise)} mK at 5 g/s.`,
-  `The vapour column turns over in one slow loop and adds about ${f0(-vc.z1)} mW to Zone 1.`,
-], 0.7, 3.9, 5.7, 2.9, 13, "found list");
-card(s, 6.8, 3.3, 6.0, 3.55, "means card");
-s.addText("What it means for the design", { x: 7.0, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
-bullets(s, [
-  "The inlet temperature matters more than the layout: −31.5 °C is too cold for Zone 1 with every layout.",
-  `Lowest spread: E_PDF (${f0(best.spread)} mK), B (${f0(lay("B", 17.5).spread)} mK) and E (${f0(lay("E", 17.5).spread)} mK). The as-built bifilar tube A* is the widest (${f0(lay("A_built", 17.5).spread)} mK), but still inside the band.`,
-  "Insulation sets the load: better foam cuts the heat by 27–56 %.",
-  `The vapour column shifts the coil wall by only a few mK and the inlet by 10–20 mK.`,
-], 7.0, 3.9, 5.6, 2.9, 13, "means list");
 
 // ================================================================= 01 heat load
 divider("01", "Heat from the lab", "How much heat reaches each copper zone, by which path, and what sets it", SEC[1]);
@@ -237,19 +216,8 @@ card(s, 6.8, 5.05, 6.0, 1.8, "vap card");
 s.addText(`The moving vapour: Zone 1 needs about +${f0((Z1 / base.Q1 - 1) * 100)} %`, { x: 7.0, y: 5.12, w: 5.6, h: 0.4, fontFace: "Cambria", fontSize: 14, bold: true, color: C.text2, isTextBox: true, margin: 0 });
 s.addText(`Convection adds ${f0(-vc.z1)} mW to Zone 1 and takes ${f0((base.Q2 - Z2) * 1000)} mW from Zone 2: the ice tray and the Perspex connectors now feed Zone 1 through the vapour. Radiation would add ${f0(rad.Z1_absorbed_mW)} mW more.`, { x: 7.0, y: 5.55, w: 5.6, h: 1.2, fontSize: 11.5, color: C.text1, isTextBox: true, margin: 0, valign: "top" });
 
-s = content("The heat-loss equation: what the heat depends on", SEC[1], "Heat ∝ ΔT and ≈ ∝ k; it falls with foam thickness, but more slowly than 1/t");
-card(s, 0.5, 1.25, 6.0, 5.6, "equation card");
-s.addText([
-  { text: "Q = ΔT / R_total", options: { fontFace: "Cambria", fontSize: 24, bold: true, color: HEX.accent1, breakLine: true } },
-  { text: "ΔT = T_lab − T_copper;  R_total = R_foam + R_film (series), paths in parallel", options: { fontSize: 12, breakLine: true } },
-  { text: " ", options: { fontSize: 8, breakLine: true } },
-  { text: "Flat layer (end plates, top):  Q = k·A·ΔT / t", options: { fontSize: 14, bold: true, color: HEX.dk2, breakLine: true } },
-  { text: "Cylinder (side wall):  R_foam = ln(r_o / r_i) / (2π·k·L)", options: { fontSize: 14, bold: true, color: HEX.dk2, breakLine: true } },
-  { text: "Outer film:  R_film = 1 / (h · 2π·r_o·L)", options: { fontSize: 14, bold: true, color: HEX.dk2, breakLine: true } },
-  { text: " ", options: { fontSize: 8, breakLine: true } },
-  { text: "Side wall of Zone 1:  Q = ΔT / [ ln(r_o/r_i)/(2πkL) + 1/(2π r_o L h) ]", options: { fontSize: 13, bold: true, breakLine: true } },
-  { text: "r_i 43 mm, r_o = r_i + t, L 118 mm, k 0.035, h 8, ΔT 65 K → 2.06 W from the side; the full chamber model gives 2.58 W, the rest comes through the ends, plates and the Perspex/vapour paths.", options: { fontSize: 11, color: HEX.accent6 } },
-], { x: 0.7, y: 1.4, w: 5.6, h: 5.3, valign: "top", isTextBox: true, margin: 0, objectName: "equation" });
+s = content("Deriving the heat-loss equation, and what the heat depends on", SEC[1], "Heat ∝ ΔT and ≈ ∝ k; it falls with foam thickness, but more slowly than 1/t");
+addFit(s, fig("hl_derivation.png"), 0.4, 1.1, 6.3, 5.85, { name: "derivation", align: "left" });
 const PR = [["Heat loss is …", "to", "Check with the chamber model"],
   ["directly ∝", "ΔT (lab − copper)", "exactly linear: 38.8 mW/K (Z1), 35.6 mW/K (Z2)"],
   ["directly ∝ (almost)", "foam conductivity k", "Q/k changes only 7 % over k 0.010–0.050"],
@@ -258,7 +226,7 @@ const PR = [["Heat loss is …", "to", "Check with the chamber model"],
   ["inversely ∝", "foam thickness t (flat); ln(r_o/r_i) (cylinder)", "10 → 100 mm: Z1 4.71 → 2.02 W, only 2.3× less"],
   ["inversely ∝", "total resistance R", "all of the above act through R"]];
 s.addTable(PR.map((r, i) => i === 0 ? r.map(HDR) : [TD(r[0], { bold: true, color: r[0].startsWith("inv") ? "B4471A" : "138A5E" }), TD(r[1]), TD(r[2], { fontSize: 10 })]),
-  { x: 6.7, y: 1.25, w: 6.1, colW: [1.45, 2.0, 2.65], rowH: 0.62, border: TB, objectName: "proportionality table" });
+  { x: 6.9, y: 1.3, w: 5.95, colW: [1.45, 1.95, 2.55], rowH: 0.7, border: TB, objectName: "proportionality table" });
 
 s = content("Heat against insulation thickness, both zones", SEC[1], `Doubling the foam from 50 to 100 mm cuts Zone 1 only from 2.58 to 2.02 W: a better foam beats more thickness`);
 addFit(s, fig("hl_thickness.png"), 0.4, 1.2, 12.5, 5.6, { name: "thickness" });
@@ -291,21 +259,6 @@ ORDER.forEach((k, i) => {
     { text: nm(lay(k, 17.5).name).replace(/^\S+ /, "").replace(/^as built: /, "as built: "), options: { fontSize: 10, color: HEX.dk2, bold: true } }],
     { x, y, w: 2.05, h: 0.45, isTextBox: true, margin: 0, valign: "top" });
 });
-ORDER.forEach((k) => {
-  const a = lay(k, 17.5), b = lay(k, 5);
-  s = content(`${short(k)} · ${nm(a.name).replace(/^\S+ /, "")}`, SEC[2], DESC[k]);
-  addFit(s, fig(`cards/${k}_17.5_card.png`), 0.35, 1.1, 12.6, 4.25, { name: `${k} card` });
-  const st = [[`${f0(a.spread)} / ${f0(b.spread)} mK`, "inner-wall spread at 17.5 / 5 g/s"], [`${f3(a.inlet)} °C`, "inlet that centres the wall, 17.5 g/s"],
-    [`${f2(a.inlet - a.margin / 1000)} to ${f2(a.inlet + a.margin / 1000)}`, "allowed inlet window, °C"], [`${f1(a.dp)} kPa`, "pressure drop at 17.5 g/s (friction)"],
-    [a.Re[0] === a.Re[1] ? f0(a.Re[0]) : `${f0(a.Re[0])}–${f0(a.Re[1])}`, "Reynolds number at 17.5 g/s"]];
-  st.forEach((t, i) => {
-    const x = 0.5 + i * 2.48;
-    card(s, x, 5.5, 2.35, 1.4, `stat ${i}`);
-    s.addText(t[0], { x: x + 0.12, y: 5.55, w: 2.15, h: 0.65, fontFace: "Cambria", fontSize: 17, bold: true, color: C.accent1, isTextBox: true, margin: 0, valign: "middle" });
-    s.addText(t[1], { x: x + 0.12, y: 6.2, w: 2.15, h: 0.6, fontSize: 10.5, color: C.text1, isTextBox: true, margin: 0, valign: "top" });
-  });
-});
-
 s = content("Zone 1 inner-wall spread for every coil type, at both flows", SEC[2], `All 11 coil types keep Zone 1 well inside the 300 mK band; E_PDF, B and E are the flattest`);
 s.addChart(pres.charts.BAR, [
   { name: "17.5 g/s", labels: ORDER.map(short), values: ORDER.map((k) => +lay(k, 17.5).spread.toFixed(1)) },
@@ -365,7 +318,7 @@ bullets(s, [
 // ================================================================= 04 vapour
 divider("04", "The vapour column, coupled to the room", "Transient 3-D CFD of the R134a vapour inside the bore, 0–120 s, exchanging heat with the room and insulation every second", SEC[4]);
 s = content("Vapour column model: walls from the room and insulation model", SEC[4], "Copper walls at set point, ice tray at 0 °C, Perspex walls see the room through the insulation");
-addFit(s, fig("v_bc_model.png"), 0.4, 1.2, 12.5, 5.0, { name: "bc model" });
+addFit(s, fig("v_bc_model_noG.png"), 0.4, 1.2, 12.5, 5.0, { name: "bc model" });
 note(s, "Boussinesq R134a vapour at 84.4 kPa, 1 mm grid (0.24 M cells), 0–120 s. 0–60 s: walls fixed to the still-vapour state; 60–120 s: walls updated every 1 s from the room model (two-way). Radiation not included.", 0.5, 6.3, 12.3, 0.6, 11);
 
 s = content("Transient, t = 0 to 120 s, next to the time-mean field", SEC[4], `Plumes form within 3 s; the mean is one slow loop, and Zone 1 draws a steady ~${f0(-vc.z1)} mW from the vapour`);
@@ -423,6 +376,28 @@ note(s, "The time-mean convective heat from the vapour CFD (a map over the Zone 
 
 // ================================================================= 05 conclusions
 divider("05", "Conclusions", "What to set, what to build, and what to study next", SEC[5]);
+s = content("Summary: every coil layout holds the inner wall within ±0.15 K", SEC[5], `Design basis: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W; flattest wall with the paired axial sleeve (E_PDF)`);
+stat(s, 0.5, 1.35, 3.0, `${f2(Z1)} W`, "heat into Zone 1 (−30 °C), including the moving vapour column", null, "z1");
+stat(s, 3.65, 1.35, 3.0, `${f2(Z2)} W`, "heat into Zone 2 (−15 °C), including the moving vapour column", null, "z2");
+stat(s, 6.8, 1.35, 3.0, `${f0(best.spread)} mK`, "smallest inner-wall spread: paired axial sleeve E_PDF at 17.5 g/s", null, "best");
+stat(s, 9.95, 1.35, 2.85, `≥ ${f0(minMargin)} mK`, "margin left inside ±0.15 K, worst layout and flow", null, "margin");
+card(s, 0.5, 3.3, 6.05, 3.55, "found card");
+s.addText("What we found", { x: 0.7, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
+bullets(s, [
+  `Conduction alone brings ${f2(base.Q1)} W into Zone 1 and ${f2(base.Q2)} W into Zone 2 (50 mm foam, 35 °C lab); ${f0(base.plates * 100)} % enters through the copper end plates.`,
+  `All 11 coil layouts hold ±0.15 K at both 17.5 and 5 g/s, at the right inlet temperature (about −30.1 to −30.3 °C for Zone 1).`,
+  `The methanol warms ${f0(lay("P", 17.5).rise)} mK through the zone at 17.5 g/s and ${f0(lay("P", 5).rise)} mK at 5 g/s.`,
+  `The vapour column turns over in one slow loop and adds about ${f0(-vc.z1)} mW to Zone 1.`,
+], 0.7, 3.9, 5.7, 2.9, 13, "found list");
+card(s, 6.8, 3.3, 6.0, 3.55, "means card");
+s.addText("What it means for the design", { x: 7.0, y: 3.4, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
+bullets(s, [
+  "The inlet temperature matters more than the layout: −31.5 °C is too cold for Zone 1 with every layout.",
+  `Lowest spread: E_PDF (${f0(best.spread)} mK), B (${f0(lay("B", 17.5).spread)} mK) and E (${f0(lay("E", 17.5).spread)} mK). The as-built bifilar tube A* is the widest (${f0(lay("A_built", 17.5).spread)} mK), but still inside the band.`,
+  "Insulation sets the load: better foam cuts the heat by 27–56 %.",
+  `The vapour column shifts the coil wall by only a few mK and the inlet by 10–20 mK.`,
+], 7.0, 3.9, 5.6, 2.9, 13, "means list");
+
 s = content("Conclusions and next steps", SEC[5], "Any of the 11 layouts works at the right inlet; E_PDF or B for the flattest wall, A* is acceptable as built");
 card(s, 0.5, 1.35, 6.0, 5.4, "conclusions card");
 s.addText("Conclusions", { x: 0.7, y: 1.45, w: 5.6, h: 0.45, fontFace: "Cambria", fontSize: 18, bold: true, color: C.text2, isTextBox: true, margin: 0 });
@@ -440,7 +415,6 @@ bullets(s, [
   "Jacket H: improve the ring feed, or use a plenum-fed axial jacket.",
   "Vapour CFD on a finer grid with longer statistics, with radiation in the bore.",
   "Pump-stop and chiller-stop transients on the 3-D copper model.",
-  "Full Fluent run of the chosen layout.",
 ], 7.0, 1.95, 5.6, 4.7, 13, "next list");
 
 pres.writeFile({ fileName: OUT }).then(async () => {

@@ -300,3 +300,16 @@ Changes requested on the short deck (`deck/build_present.js`), now 39 slides:
 It is now slide 2 of the short deck, with one card per zone (set point, allowed range, length breakdown, heat to remove from our model) and one for the surroundings.
 
 The sketch's "about 10 W / 7.5 W" were early design assumptions. The cards use the computed 2.74 W and 1.75 W.
+
+## 7 Oct: short deck, second review (29 slides)
+
+Page numbers refer to the user's uploaded 39-slide copy.
+
+- **Page 2** (key-results summary) moved to the conclusions section as "Summary: …". The true-scale chamber schematic is now slide 2.
+- **No-insulation heat leak** added to the schematic slide (`results/heatload_noinsulation.json`), compared with 2.58 / 1.81 W with 50 mm foam:
+  - bare copper in 35 °C air, h = 8: Q = h·A·ΔT gives Zone 1 ≈ 20.0 W (A = 0.0384 m²) and Zone 2 ≈ 15.8 W;
+  - outer foam removed, filling between the plates kept (chamber model): 7.73 / 6.04 W.
+- **Page 6:** the derivation is typeset (`hl_derivation.py` → `figs/hl_derivation.png`). Six steps: Fourier → cylinder → film → series/parallel → Zone 1 side wall 2.06 W → bare 20 W. The proportionality table stays on the right.
+- **Pages 12–22** (per-coil slides) removed; the "Eleven coil types" overview stays.
+- **Page 31:** the G_out (outside conductance) panel is cropped off the vapour-model figure (`figs/v_bc_model_noG.png`).
+- **Page 39:** "Full Fluent run of the chosen layout" removed from the next steps.
