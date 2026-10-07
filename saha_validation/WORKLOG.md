@@ -142,3 +142,7 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
 - 05:21 UTC — original vapour run at t = 92 s, coupling instability found; CFD A*, A done.
 - 05:40 UTC — corrected vapour run restarted from t = 75 s (Robin cap, stable coupling) → `results/vapour_run2`.
   Original run left running to keep its 0–85 s heat history. Coolant CFD batch on B.
+- 05:48 UTC — coolant CFD scope cut (user): run only **E_PDF, B** (two lowest spreads on the sheets), **A** (folded
+  bifilar), **P** (plain helix) and **H** (jacket), at **both 17.5 and 5 g/s**. Already done at 17.5 g/s: P, A, B
+  (and A*, kept). Remaining 7 runs: E_PDF, H at 17.5; E_PDF, B, A, P, H at 5 g/s. Partial C run stopped.
+  Coolant CFD so far: B 40.0 mK / −30.096 °C vs sheet 42.9 mK / −30.086 °C → good; Δp 166 vs 67 kPa (voxel walls).
