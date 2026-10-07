@@ -142,16 +142,16 @@ def coupling(run, room, fname):
     last_cp = cp[-1]
     fig, (a, b, c) = plt.subplots(1, 3, figsize=(15, 6.2), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
     zr = room.vf_pos[w]
-    # coupled wall temperature: the time-mean vapour field drawn through the room model to a fixed point
+    # coupled wall temperature: the time-mean vapour field drawn through the room model with the same band
+    # exchange as the run (vapour/bands.py), iterated to its fixed point
+    import bands
+    band, nb = bands.make_bands(room)
     T_ext = room.T_ext0.copy()
-    for it in range(30):
+    for it in range(40):
         col.set_bc(*v3.room_bc(col, room, T_ext))
         _, lat, capq = col.wall_heat(T)
-        qf = v3.layer_heat_to_faces(col, room, lat, capq)
-        Tsol, Tw_room = room.solve(qf)
-        T_new = Tw_room + qf / (room.G_out * room.vf_A)
-        if np.abs(T_new - T_ext).max() < 1e-4: break
-        T_ext = 0.5 * T_ext + 0.5 * T_new
+        qv = v3.layer_heat_to_faces(col, room, lat, capq)
+        T_ext, Tsol, Tw_room, qf = bands.exchange(room, band, nb, T_ext, qv, 0.5)
     Tw_cpl = Tw_room[w]
     coupling.result = dict(zone_room=room.zone_heat(Tsol), q_pmma_mW=float(qf.sum() * 1e3),
                            dT_lo=float((Tw_room - Tw_one)[w & (room.vf_pos < 60)].mean()),

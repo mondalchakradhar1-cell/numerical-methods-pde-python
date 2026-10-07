@@ -87,20 +87,38 @@ def render_midplane(p, T, xc, zc, sec, bar=False):
                                     color="black", title_font_size=12, label_font_size=10, n_labels=7))
 
 
+def midplane_mesh(F, xc, zc, sec, name):
+    """mid-plane (y = 0) as a 2-D structured surface in 3-D, radius drawn x SR; F has shape (nx, nz)"""
+    dx = (xc[1] - xc[0]) * 1e3
+    dz = (zc[1] - zc[0]) * 1e3
+    xe = (np.r_[xc - (xc[1] - xc[0]) / 2, xc[-1] + (xc[1] - xc[0]) / 2]) * 1e3 * SR
+    ze = np.r_[zc - (zc[1] - zc[0]) / 2, zc[-1] + (zc[1] - zc[0]) / 2] * 1e3
+    X, Z = np.meshgrid(xe, ze, indexing="ij")
+    g = pv.StructuredGrid(X, np.zeros_like(X) + 0.01, Z)
+    jm = sec.shape[1] // 2
+    vals = np.where(sec[:, jm][:, None], F, np.nan)
+    g.cell_data[name] = vals.ravel(order="F")
+    return g.threshold(-1e9, scalars=name)
+
+
 def frame(snap, P_hist, xc, zc, sec, fname, title):
-    T = snap["T"].astype(float)
+    """two 3-D panels of one instant: mid-plane temperature and mid-plane vertical velocity"""
     p = pv.Plotter(off_screen=True, window_size=(1100, 1200), shape=(1, 2), border=False)
     p.set_background("white")
     p.subplot(0, 0)
-    scenery(p, cut=True); render_midplane(p, T, xc, zc, sec, bar=True); camera(p)
+    scenery(p, cut=True)
+    p.add_mesh(midplane_mesh(snap["Tmid"].astype(float), xc, zc, sec, "T"), scalars="T", cmap=CMAP, clim=CLIM, lighting=False,
+               scalar_bar_args=dict(title="vapour T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
+                                    color="black", title_font_size=12, label_font_size=10, n_labels=7))
+    camera(p)
     p.add_text("temperature, mid-plane", position="upper_edge", font_size=11, color="black")
     p.subplot(0, 1)
     scenery(p, cut=True)
-    if P_hist is not None and len(P_hist) > 1:
-        poly = particles_poly(P_hist, T, xc, zc, sec, tail=min(10, len(P_hist)))
-        p.add_mesh(poly, scalars="T", cmap=CMAP, clim=CLIM, line_width=1.6, show_scalar_bar=False)
+    p.add_mesh(midplane_mesh(snap["wmid"].astype(float), xc, zc, sec, "w"), scalars="w", cmap="RdBu_r", clim=(-0.1, 0.1), lighting=False,
+               scalar_bar_args=dict(title="w (m/s)", vertical=True, position_x=0.86, position_y=0.25, height=0.5,
+                                    color="black", title_font_size=12, label_font_size=10, n_labels=5))
     camera(p)
-    p.add_text("tracer paths (last 1 s)", position="upper_edge", font_size=11, color="black")
+    p.add_text("vertical velocity, mid-plane", position="upper_edge", font_size=11, color="black")
     p.add_text(title, position="lower_edge", font_size=12, color="black")
     p.screenshot(fname)
     p.close()
@@ -163,7 +181,7 @@ def gif(run, fname, every=1, fps=8):
             idx = np.nonzero(part["t"] <= t + 1e-6)[0]
             if len(idx):
                 Ph = part["P"][max(0, idx[-1] - 9): idx[-1] + 1]
-        phase = "one-way" if t < 60 else "two-way coupled"
+        phase = "one-way walls" if t < 60 else "two-way coupled walls"
         frame(d, Ph, xc, zc, sec, tmp, f"t = {t:6.1f} s   ({phase})")
         im = Image.open(tmp).convert("RGB")
         im = im.resize((im.width // 2, im.height // 2), Image.LANCZOS)

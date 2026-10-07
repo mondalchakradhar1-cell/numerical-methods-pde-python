@@ -178,3 +178,13 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   a p = 0 sink at the top of the jacket and the jacket drained through it (8 m/s, rise 149 mK). Same exact-boundary
   gap between the E / E_PDF lanes and their top pockets (16 spurious links). Joins now overlap by a fraction of a
   cell: H, E, E_PDF have 0 links (fully connected). Rerunning H and E_PDF at both flows and B at 5 g/s.
+- 07:35 UTC — **vapour run finished (t = 120 s).** Coupled time means 85–120 s (no radiation) vs coupled deck (with radiation):
+  ice tray 49.3 mW (49), lower / middle connector 52.8 / 52.1 mW (58 / 51), Zone 2 wall +18.2 mW (+17),
+  **Zone 1 wall 172 ± 2.5 mW (178; 172 one-way)**, region means −9.5 / −15.2 / −20.9 / −26.6 / −0.8 °C
+  (−9.0 / −15.2 / −20.8 / −26.5 / −2.8), w rms 0.030 m/s (0.032).
+  **Zone totals: Zone 1 = 2.567 W (room, with the vapour heat drawn) + 0.172 W = 2.739 W; Zone 2 = 1.768 − 0.018 = 1.750 W.**
+  Deck: 2.776 / 1.747 W including 34 / 6 mW radiation → ≈ 2.742 / 1.741 W without it. **Same answer.**
+  The only clear difference is the top region (−0.8 vs −2.8 °C): no radiation here, so the cap is not cooled.
+  One-way (25–60 s, rebuilt from snapshots): Zone 1 175 mW, ice 47 mW, connectors 51 / 50 mW, Zone 2 +26 mW
+  (deck one-way: 172, 51, 60 / 51, +9).
+  Combined record for figures and the GIF: `results/vapour_combined` = run 1 (0–75 s) + run 2 (75–120 s).

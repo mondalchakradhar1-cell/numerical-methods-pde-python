@@ -38,7 +38,7 @@ if os.path.exists(cf):
 sv = os.path.join(R, "sheet_verdicts.json")
 if os.path.exists(sv):
     S["sheet_verdicts"] = json.load(open(sv))
-vr = os.path.join(R, "vapour_run")
+vr = os.path.join(R, "vapour_combined")
 if os.path.exists(os.path.join(vr, "history.json")):
     H = json.load(open(os.path.join(vr, "history.json")))
     h = H["hist"]
