@@ -207,3 +207,19 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   sheets, every coolant CFD case at both flows with tracer animations, extra wall maps/profiles, work-log timeline) and
   `SAHA_revalidation_all.7z.001–.015` (7-Zip volumes, 28 MB each: inputs, code, all results incl. vapour runs, figures, both decks, work log, README) and `SAHA_revalidation_lite.zip` (29 MB: code, numbers, PNG figures, sheets PDF, log).
   Upload limit is 30 MB per file, hence the volumes. The code and the main deck are on the git branch.
+
+## 7 Oct: two decks in the style of the original SAHA decks
+
+**What was done.** Built `deck/build_orig.js`, which uses the original decks' theme and layout:
+- Cambria/Calibri; navy 13294B with copper B87333.
+- Navy title slides and section dividers with large copper section numbers (01–06).
+- EEF3F8 cards with copper stat numbers, and a navy takeaway bar at the bottom of every content slide.
+- Small grey footer with the slide number.
+
+It builds two decks from the same results and figures:
+- **Summary** (`SHORT=1`): 17 slides. Answer, method, heat load, archetype parity/table/differences/inlets, coolant CFD table plus E_PDF in 3-D and as an animation, vapour streamlines, the 0–120 s GIF, deck against re-simulation, vapour effect on the coils, verdict and next steps. Size 12 MB.
+- **Detailed** (`FULL=1`): 97 slides. Everything, plus the appendix of all 22 sheets, every coolant CFD case at both flows with tracer GIFs, and the work log.
+
+The detailed deck is 98 MB. `deck/split_pptx.py` splits it into 5 parts of ≤ 27 MiB each by dropping slides (no recompression), so each file fits the 30 MiB upload limit. All files pass the OOXML validator.
+
+**What it means.** The numbers are unchanged from the validated results (`results/summary.json`); only the presentation changed. The ChatGPT deck was not used as a source. Its finest chamber result (Z1 2.5795 W) agrees with ours (2.579 W).
