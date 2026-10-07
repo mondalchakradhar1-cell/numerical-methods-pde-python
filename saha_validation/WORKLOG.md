@@ -146,3 +146,8 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   bifilar), **P** (plain helix) and **H** (jacket), at **both 17.5 and 5 g/s**. Already done at 17.5 g/s: P, A, B
   (and A*, kept). Remaining 7 runs: E_PDF, H at 17.5; E_PDF, B, A, P, H at 5 g/s. Partial C run stopped.
   Coolant CFD so far: B 40.0 mK / −30.096 °C vs sheet 42.9 mK / −30.086 °C → good; Δp 166 vs 67 kPa (voxel walls).
+- 05:55 UTC — the first vapour run (`results/vapour_run`) was stopped at t = 101 s: after 85 s its old coupling had
+  driven Zone 1 to −1479 mW (garbage) and it was slowing the other jobs. Its 0–85 s heat history is rebuilt from the
+  saved 3-D temperature snapshots at 1 s resolution (`vapour/history_from_snaps.py` → `history_rebuilt.json`):
+  exact for the one-way phase (0–60 s), approximate for 60–85 s (uses the one-way T_ext).
+  The coupled results (85–120 s means) come from `results/vapour_run2` (restart at 75 s, stable coupling, Robin cap).
