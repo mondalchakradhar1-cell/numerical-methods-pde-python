@@ -235,6 +235,23 @@ addFit(s, fig("hl_kfoam.png"), 0.4, 1.2, 12.5, 5.6, { name: "kfoam" });
 s = content("Where the heat enters along the height of each zone", SEC[1], `The two 11 mm end plates take ${f0(z1p / base.Q1 * 100)} % of Zone 1's heat and ${f0(z2p / base.Q2 * 100)} % of Zone 2's: the coil must work hardest at the ends`);
 addFit(s, fig("hl_height.png"), 0.4, 1.2, 12.5, 5.6, { name: "height" });
 
+s = content("How the coolant inlet temperature is calculated", SEC[1], "The inlet must sit below −30 °C by half the coolant warming plus the wall-to-coolant offset: about −30.15 °C at 17.5 g/s, −30.3 °C at 5 g/s");
+addFit(s, fig("inlet_derivation.png"), 0.4, 1.1, 6.3, 5.85, { name: "inlet derivation", align: "left" });
+const IT = [["Coil, flow", "Coolant warming, mK", "Q/UA, mK", "Hand estimate, °C", "3-D inlet, °C", "Window, °C"]];
+[["A_built", 17.5], ["A_built", 5], ["P", 17.5], ["P", 5], ["B", 17.5], ["B", 5], ["E_PDF", 17.5], ["E_PDF", 5]].forEach(([k, fl]) => {
+  const r = lay(k, fl);
+  const est = -30 - r.rise / 2000 - base.Q1 / r.UA;
+  IT.push([TD(`${short(k)}, ${fl} g/s`, { bold: true, fontSize: 10 }), TD(f0(r.rise), { fontSize: 10, align: "center" }), TD(f0(base.Q1 / r.UA * 1000), { fontSize: 10, align: "center" }),
+    TD(f2(est), { fontSize: 10, align: "center" }), TD(f3(r.inlet), { fontSize: 10, align: "center", bold: true, color: HEX.accent1 }),
+    TD(`${f2(r.inlet - r.margin / 1000)} to ${f2(r.inlet + r.margin / 1000)}`, { fontSize: 10, align: "center" })]);
+});
+s.addTable(IT.map((r, i) => i === 0 ? r.map((c) => Object.assign(HDR(c), { options: Object.assign(HDR(c).options, { fontSize: 10 }) })) : r),
+  { x: 6.85, y: 1.3, w: 6.0, colW: [1.15, 0.85, 0.7, 1.0, 0.95, 1.35], rowH: 0.42, border: TB, objectName: "inlet table" });
+card(s, 6.85, 5.6, 6.0, 1.3, "inlet card");
+s.addText([{ text: "Why −31.5 °C does not work: ", options: { bold: true, color: HEX.dk2 } },
+  { text: "it is 1.2–1.35 K below the centring inlet, far outside every ±0.1 K window, so the whole wall would sit about 1.3 K too cold." }],
+  { x: 7.05, y: 5.65, w: 5.6, h: 1.2, fontSize: 12, color: C.text1, isTextBox: true, margin: 0, valign: "middle" });
+
 // ================================================================= 02 coil layouts
 divider("02", "The 11 coil types", "Same Zone 1, same heat, same coolant: each coil type, its passages, and how flat it keeps the inner copper wall", SEC[2]);
 const DESC = {

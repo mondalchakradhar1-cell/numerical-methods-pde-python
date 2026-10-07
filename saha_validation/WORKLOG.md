@@ -313,3 +313,15 @@ Page numbers refer to the user's uploaded 39-slide copy.
 - **Pages 12–22** (per-coil slides) removed; the "Eleven coil types" overview stays.
 - **Page 31:** the G_out (outside conductance) panel is cropped off the vapour-model figure (`figs/v_bc_model_noG.png`).
 - **Page 39:** "Full Fluent run of the chosen layout" removed from the next steps.
+
+## 7 Oct: inlet-temperature slide
+
+New slide 10 in the short deck, "How the coolant inlet temperature is calculated" (`inlet_derivation.py` → `figs/inlet_derivation.png`). It goes in six steps:
+1. ΔT_cool = Q/(ṁ c_p) = 64 mK at 17.5 g/s (226 mK at 5 g/s).
+2. Wall-to-coolant offset Q/UA.
+3. Mean wall ≈ T_in + ΔT_cool/2 + Q/UA.
+4. Hand estimate: T_in ≈ −30 − ΔT/2 − Q/UA = −30.09 °C for A*.
+5. 3-D centring of the max and min wall points (linear problem): −30.149 °C.
+6. Window: ±(150 − spread/2) mK.
+
+A table gives these for A*, P, B and E_PDF at both flows. The hand estimate is 20–90 mK warmer than the 3-D value, because the end plates bring 74 % of the heat in far from the coolant. A card explains why −31.5 °C fails (1.2–1.35 K too cold).
