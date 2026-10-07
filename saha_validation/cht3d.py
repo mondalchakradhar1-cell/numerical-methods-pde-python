@@ -31,8 +31,14 @@ def axis(breaks, dmax):
 
 
 class Grid:
-    def __init__(self, r_breaks, z_breaks, ntheta=180, dr_fine=0.5, dz_fine=0.5, r_fine_max=36.0):
-        self.rf = axis(sorted(set(r_breaks)), lambda a, b: dr_fine if b <= r_fine_max + 1e-9 else 2.0)
+    def __init__(self, r_breaks, z_breaks, ntheta=180, dr_fine=0.5, dz_fine=0.5, r_fine_max=36.0, r_refine=None):
+        def dfun(a, b):
+            if r_refine and any(a >= lo - 1e-9 and b <= hi + 1e-9 for lo, hi, _ in r_refine):
+                return min(d for lo, hi, d in r_refine if a >= lo - 1e-9 and b <= hi + 1e-9)
+            return dr_fine if b <= r_fine_max + 1e-9 else 2.0
+        if r_refine:
+            r_breaks = list(r_breaks) + [x for lo, hi, _ in r_refine for x in (lo, hi)]
+        self.rf = axis(sorted(set(r_breaks)), dfun)
         self.zf = axis(sorted(set(z_breaks)), lambda a, b: dz_fine if (a >= -1e-9 and b <= 96 + 1e-9) else 1.0)
         self.nt = ntheta
         self.tf = np.linspace(0, 2 * np.pi, ntheta + 1)
@@ -55,6 +61,7 @@ class Model:
         self.pid = -np.ones(g.shape, np.int64)         # passage id of a fluid cell
         self.contact = {}                               # extra interface resistance on r-faces: mask over r-face array
         self.passages = []
+        self.scell = np.zeros(g.shape)                  # progress along the passage of each fluid cell (mm)
         self.nodes_m, self.nodes_up, self.nodes_pid, self.nodes_s = [], [], [], []
         self.inlets = []                                # node ids fed from the inlet at T_in
         self.outlets = []                               # (node id, mass flow)
@@ -78,6 +85,7 @@ class Model:
             self.nodes_m.append(m); self.nodes_up.append([(n0 + i - 1, m)] if i else []); self.nodes_pid.append(pid)
             self.nodes_s.append((i + 0.5) * L / nseg)
         self.mat[mask] = 3; self.k[mask] = 0; self.node[mask] = n0 + seg; self.pid[mask] = pid
+        self.scell[mask] = s[mask]
         h, Re, f = props.passage_htc(shape, m, coil_D, nu_override, turbulent)
         P = props.section(shape)[2]
         self.passages.append(dict(name=name, first=n0, last=n0 + nseg - 1, L=L, shape=shape, m=m, h=h, Re=Re, f=f,

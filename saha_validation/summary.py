@@ -32,6 +32,12 @@ for tag in ("vapourmap", "grid", "turb", "hx"):
     f = os.path.join(R, f"layouts_{tag}.json")
     if os.path.exists(f):
         S[tag] = json.load(open(f))
+cf = os.path.join(R, "coolant_cfd.json")
+if os.path.exists(cf):
+    S["coolant_cfd"] = [{k: v for k, v in r.items() if k != "flow_hist"} for r in json.load(open(cf))]
+sv = os.path.join(R, "sheet_verdicts.json")
+if os.path.exists(sv):
+    S["sheet_verdicts"] = json.load(open(sv))
 vr = os.path.join(R, "vapour_run")
 if os.path.exists(os.path.join(vr, "history.json")):
     H = json.load(open(os.path.join(vr, "history.json")))

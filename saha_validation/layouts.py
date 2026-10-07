@@ -80,7 +80,7 @@ def grid_for(name, dr=0.5, dz=0.5, nt=180):
     if name == "B": rb = [13.5, 15, 20, 32, 43]
     if name == "E_PDF": rb = [13.5, 15, 23.75, 24.25, 27, 29, 36, 43]
     zb = [-11, 0, 96, 107]
-    return cht3d.Grid(rb, zb, ntheta=nt, dr_fine=dr, dz_fine=dz, r_fine_max=36 if name != "E_PDF" else 36)
+    return cht3d.Grid(rb, zb, ntheta=nt, dr_fine=dr, dz_fine=dz, r_fine_max=36, r_refine=R_REFINE.get(name) if REFINE[0] else None)
 
 
 def coil_pair(mdl, g, rc, d, zlo, zhi, pitch_strand, th0, m, D, name, z_shift=None):
@@ -123,7 +123,7 @@ def build(name, m_tot, dr=0.5, dz=0.5, nt=180):
         nr = g.shape[0]
         i20 = int(np.argmin(np.abs(g.rf[1:-1] - 20.0)))
         ex = np.zeros((nr - 1, g.shape[1], g.shape[2]))
-        tube_out = mdl.mat[i20 + 1] == 1
+        tube_out = (mdl.mat[i20 + 1] == 1) & (g.zc[None, :] >= 0) & (g.zc[None, :] <= 96)   # tube region only, not the plates
         # distance in z from the nearest tube centreline at r = 22.6
         zc_dist = np.full(tube_out.shape, 1e9)
         for z0, pitch, th0, sense in ((4.0, p, 0.0, 1), (4.0 + p / 2 + p * turns, -p, phi, -1)):
@@ -138,8 +138,10 @@ def build(name, m_tot, dr=0.5, dz=0.5, nt=180):
         solder = tube_out & (zc_dist <= 1.5)
         gap = tube_out & ~solder
         A = g.rf[i20 + 1] * 1e-3 * g.dt * g.dz[None, :] * 1e-3
-        ex[i20][solder] = 0.3e-3 / K_SOLDER_AREA(1.0)
-        ex[i20][gap] = 0.1e-3 / cht3d.K_FOAM
+        if CONTACT[0] == "solder_gap":                       # optional: 3 x 0.3 mm solder strip, 0.1 mm foam gap elsewhere
+            ex[i20][solder] = 0.3e-3 / K_SOLDER_AREA(1.0)
+            ex[i20][gap] = 0.1e-3 / cht3d.K_FOAM
+        # default ("ideal"): perfect thermal contact wherever the tube wall touches the buffer
         mdl.contact["r"] = ex / 1.0                              # resistance per unit area (m2K/W); divided by A below
         mdl.contact_is_specific = True
         mdl.Q_sheet = 2.55
@@ -383,6 +385,9 @@ def build(name, m_tot, dr=0.5, dz=0.5, nt=180):
     return g, mdl
 
 
+REFINE = [False]         # CFD: refine r so the thin channels get several cells
+R_REFINE = {"E": [(20.0, 20.5, 0.125)], "E_PDF": [(23.75, 24.25, 0.125)], "H": [(20.0, 21.0, 0.25)]}
+CONTACT = ["ideal"]      # tube-buffer joint of A*: "ideal" (no gap, no resistance) or "solder_gap"
 JACKET_NU = [5.385]          # one wall heated, other adiabatic (parallel plates, based on Dh = 2 x gap)
 
 

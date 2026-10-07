@@ -3,3 +3,5 @@ results/vapour_run/
 results/field_*.npz
 figs/test_frame.png
 *.log
+results/coolant_*.npz
+figs/coolant/_f.png

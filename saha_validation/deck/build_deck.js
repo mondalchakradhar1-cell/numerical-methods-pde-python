@@ -270,6 +270,64 @@ s = content("Wall spread and pressure drop, side by side", "B · Coil archetypes
 addFit(s, fig("cmp_spread.png"), 0.5, 1.15, 12.3, 2.85, { name: "spread bars" });
 addFit(s, fig("cmp_dp.png"), 0.5, 4.05, 12.3, 2.85, { name: "dp bars" });
 
+s = content("Inlet temperature: every centring inlet and window reproduces", "B · Coil archetypes in 3-D");
+addFit(s, fig("inlet_validation.png"), 0.4, 1.2, 12.5, 4.9, { name: "inlet validation" });
+note(s, `Grey bars: the result sheets' allowed inlet windows; coloured bars: this model. ${LS.inlet_within20} of ${LS.n} centring inlets agree within 20 mK; the exceptions are H (film area) and A* at 5 g/s. The −31.5 °C setting lies outside every window.`, 0.5, 6.2, 12.3, 0.7, 12);
+
+for (const k of ["A_built_17.5", "E_PDF_17.5"]) {
+  const f = fig(`sheets/${k}.png`);
+  if (!fs.existsSync(f)) continue;
+  s = content(`Re-validated result sheet: ${k.replace("A_built", "A*").replace("_", " at ")} g/s`, "B · Coil archetypes in 3-D");
+  addFit(s, f, 0.4, 1.1, 12.5, 5.85, { name: `sheet ${k}` });
+}
+
+// ================================================================= section B2: coolant CFD
+if (S.coolant_cfd && S.coolant_cfd.length) {
+  pres.addSection({ title: "B2 · 3-D coolant CFD" });
+  s = pres.addSlide({ masterName: "SECTION", sectionTitle: "B2 · 3-D coolant CFD" });
+  s.addText("B2 · The methanol itself, in 3-D", { placeholder: "title" });
+  s.addText("A coarse conjugate CFD: laminar Navier–Stokes in every passage, the coolant warming as it travels, and the copper around it. No film correlation.", { placeholder: "body" });
+
+  s = content("Coolant CFD set-up", "B2 · 3-D coolant CFD");
+  bullets(s, [
+    "Same cylindrical grid as the layout model, refined: 0.4 mm in r and z, 2° round; thin channels refined to 0.125 mm (E lanes) and 0.25 mm (H gap). 0.07–0.4 M methanol cells per layout.",
+    "Steady incompressible laminar Navier–Stokes by artificial compressibility, staggered faces, second-order upwind advection, Heun (RK2) pseudo-time, centrifugal and Coriolis terms of the curved channels.",
+    "Inlet: a volume source in the first 2 mm of the passage; outlet: p = 0. Hairpins and the radial link of B are mass + mixed-enthalpy links.",
+    "Then one conjugate energy solve: methanol + copper + foam, upwind advection with the CFD fluxes, the same external heat as the layout model.",
+    "Limit: walls are voxel stair-steps (one 0.4 mm step every ~8 mm along a helix), which adds form losses: CFD Δp is an upper bound. Heat transfer, temperatures and flow paths are the useful output.",
+  ], 0.5, 1.35, 12.3, 5.4, 15, "cfd setup");
+
+  const CR = [["Layout, 17.5 g/s", "Spread, mK\nsheet / 1-D / CFD", "Inlet, °C\nsheet / 1-D / CFD", "Coolant rise, mK\n1-D / CFD", "Δp, kPa\nsheet / 1-D / CFD", "Peak speed, m/s"]];
+  const order2 = ["A_built", "P", "A", "B", "C", "D", "E", "E_PDF", "F", "G", "H"];
+  order2.forEach((k) => {
+    const c = S.coolant_cfd.find((r) => r.layout === k && Math.abs(r.m_gs - 17.5) < 1e-6);
+    const a = lay(k, 17.5);
+    if (!c) return;
+    CR.push([TD(short(k), { bold: true }), TD(`${f0(a.spread_sheet)} / ${f0(a.spread)} / ${f0(c.spread_mK)}`), TD(`${f3(a.inlet_sheet)} / ${f3(a.inlet)} / ${f3(c.inlet_C)}`),
+      TD(`${f0(a.rise)} / ${f0(c.rise_mK)}`), TD(`${f1(a.dp_sheet)} / ${f1(a.dp)} / ${f1(c.dp_kPa)}`), TD(f2(c.umax))]);
+  });
+  s = content("Coolant CFD against the sheets and the 1-D network model", "B2 · 3-D coolant CFD");
+  s.addTable(CR.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 0.5, y: 1.3, w: 12.3, colW: [1.6, 2.4, 3.1, 1.7, 2.3, 1.2], rowH: 0.42, border: TB, objectName: "cfd table" });
+  note(s, "Spread and inlet from the CFD come from a resolved (coarse) film instead of a correlation; agreement here means the developed-flow correlations used by the sheets are adequate for these geometries.", 0.5, 6.35, 12.3, 0.55, 11);
+
+  for (const k of order2) {
+    const f3d = fig(`coolant/${k}_17.5_3d.png`), fp = fig(`coolant/${k}_17.5_paths.png`);
+    if (!fs.existsSync(f3d)) continue;
+    const c = S.coolant_cfd.find((r) => r.layout === k && Math.abs(r.m_gs - 17.5) < 1e-6);
+    s = content(`${short(k)}: methanol temperature, streamlines and pressure (17.5 g/s)`, "B2 · 3-D coolant CFD");
+    addFit(s, f3d, 0.4, 1.1, 12.5, 4.0, { name: `${k} 3d` });
+    if (fs.existsSync(fp)) addFit(s, fp, 0.4, 5.1, 9.6, 1.85, { name: `${k} paths` });
+    note(s, `CFD: spread ${f0(c.spread_mK)} mK, centring inlet ${f3(c.inlet_C)} °C, coolant rise ${f0(c.rise_mK)} mK, peak speed ${f2(c.umax)} m/s, ${c.cells_fluid.toLocaleString("en-US")} methanol cells.`, 10.1, 5.2, 2.8, 1.7, 11);
+  }
+  for (const k of ["P", "A_built", "E_PDF", "H"]) {
+    const gif = fig(`coolant/${k}_17.5_flow.gif`);
+    if (!fs.existsSync(gif)) continue;
+    s = content(`${short(k)}: methanol tracers travelling and warming (animated)`, "B2 · 3-D coolant CFD");
+    addFit(s, gif, 0.4, 1.1, 7.5, 5.85, { name: `${k} gif` });
+    note(s, "Tracers released at the inlet follow the CFD streamlines; colour is the local methanol temperature. Plays in slide show.", 8.2, 1.4, 4.6, 2, 13);
+  }
+}
+
 // ================================================================= section C
 pres.addSection({ title: "C · Coupled vapour column" });
 s = pres.addSlide({ masterName: "SECTION", sectionTitle: "C · Coupled vapour column" });
