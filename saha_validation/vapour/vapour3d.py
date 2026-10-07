@@ -28,7 +28,7 @@ NU, ALPHA, G = MU / RHO, KV / (RHO * CP), 9.81
 T_REF = -15.0
 R, H = 13.5e-3, 423.5e-3
 RELAX = 0.5
-CAP_ADIABATIC = [True]   # Perspex cap underside (z = 423.5 mm): no heat exchange with the vapour
+CAP_ADIABATIC = [False]  # True: Perspex cap underside adiabatic (not used: the deck basis is a Robin cap)
 REGIONS = ["ice", "conn_lo", "z2", "conn_mid", "z1", "top_wall", "cap"]
 
 
@@ -602,8 +602,8 @@ if __name__ == "__main__":
     ap.add_argument("--t_end", type=float, default=120.0); ap.add_argument("--t_couple", type=float, default=60.0)
     ap.add_argument("--dx", type=float, default=1.0); ap.add_argument("--out", default=None)
     ap.add_argument("--w1", default="25,60"); ap.add_argument("--w2", default="85,120"); ap.add_argument("--restart", default=None)
-    ap.add_argument("--top_from_conduction", action="store_true"); ap.add_argument("--cap_robin", action="store_true")
+    ap.add_argument("--top_from_conduction", action="store_true"); ap.add_argument("--cap_adiabatic", action="store_true")
     a = ap.parse_args()
-    CAP_ADIABATIC[0] = not a.cap_robin
+    CAP_ADIABATIC[0] = a.cap_adiabatic
     run(a.t_end, a.t_couple, a.dx, out=a.out, win1=tuple(map(float, a.w1.split(","))), win2=tuple(map(float, a.w2.split(","))),
         restart=a.restart, top_from_conduction=a.top_from_conduction)

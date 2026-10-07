@@ -1,0 +1,144 @@
+# SAHA re-validation — work log
+
+A running record of what was done, why, and what each result means. Newest entries are at the bottom.
+Numbers in **bold** are the ones to quote; "deck" means the uploaded SAHA decks/PDFs (4–6 Oct 2026).
+
+---
+
+## 0. Goal
+
+Rebuild the SAHA cold-stage thermal results independently (own code, same inputs) and say, item by item,
+whether the decks' numbers come out the same:
+
+1. geometry and heat load of the two copper zones;
+2. the 11 coil archetypes (layouts A*, P, A, B, C, D, E, E_PDF, F, G, H) — wall uniformity, inlet temperature,
+   pressure drop, film conductance — first as 2-D result sheets like `SAHA_layout_result_sheets.pdf`, then as a
+   coarse 3-D CFD of the methanol inside the passages;
+3. the two-way coupled vapour column (`SAHA_vapour_coupled_radiation.pptx`) as a transient 3-D CFD, 0–120 s,
+   **without radiation** (user's decision: radiation is small, it will be checked in later detailed runs).
+
+---
+
+## 1. Geometry check
+
+What: compared every dimension across the assembly PDF, cold-zone deck, concept atlas, sleeve PDF and the
+Fluent mesh files.
+
+Result: consistent. The only apparent conflict is the "30 mm bore" in the atlas / sleeve PDF: it is the
+**30 mm OD of the copper neck** (wall r 13.5–15 mm), the real bore is 27 mm. Copper heat capacity of Zone 1
+re-computed **634 J/K** (deck 620–650). The Fluent vapour mesh passes its own verifier here (all volumes
+positive, areas and extents match).
+
+Meaning: the models in the decks all use the same chamber; nothing to correct.
+
+## 2. Heat load (`heatload_axi.py`)
+
+What: axisymmetric conduction of the whole 425 mm stack — vapour, Perspex, foam, copper held at −30/−15 °C,
+lab 35 °C with h = 8 W/m²K, ice tray 0 °C.
+
+Result: **Zone 1 2.579 W, Zone 2 1.809 W, 74 % of Zone 1's heat through the end plates.**
+Grid 0.25/0.5/1 mm changes it by < 0.2 %. Foam conductivity is the big lever (PU −27 %, aerogel −56 %).
+
+Meaning: Zone 1 matches the decks (2.58 W, room CFD 2.575 W). Zone 2 matches the room CFD (1.80 W); the
+cold-zone deck's 1.9 W is ~5 % high.
+
+## 3. Bore radiation check (`bore_radiation.py`)
+
+What: gray-body radiation inside the bore with exact view factors (one-way).
+
+Result: **37 mW into Zone 1 at copper ε 0.3** (16 / 50 mW at ε 0.05 / 0.9). Deck: 34 mW coupled, ~40 mW
+one-way. Meaning: the deck's radiation number is right — and small, which is why it is left out of the CFD.
+
+## 4. Coil archetypes — 1-D network + 3-D copper model (`cht3d.py`, `layouts.py`, `run_layouts.py`)
+
+What: 3-D finite-volume copper zone (wall, carrier/buffer, end plates) on an (r, θ, z) grid, coolant
+passages voxelised from the sheets' geometry notes, coolant as a 1-D network with developed-flow film
+coefficients (helical-coil and duct correlations). External heat = surface flux from step 2.
+Every layout at 17.5 and 5 g/s (22 cases).
+
+Result: **18 SAME, 4 CLOSE, 0 DIFFERS** against the result sheets (SAME = spread within 5 mK and inlet
+within 20 mK). Median spread difference 1.4 mK.
+
+Changes made along the way:
+- jacket H: film coefficient now based on the 2 mm hydraulic diameter of the 1 mm gap (my bug, fixed);
+- E / E_PDF: lanes lengthened to ~85 mm to match the sheets' passage plots (the PDF says 72 mm);
+- A*: a contact resistance was wrongly applied across the copper end plates (my bug, fixed);
+- A*: tube-to-buffer joint made an **ideal connection** (no gap, no solder resistance) — user's instruction.
+
+Differences that remain and what they mean:
+- **H jacket**: the sheet's UA (13.2 W/K) fits one wetted wall; with copper on both sides of the gap UA ≈ 31 W/K,
+  the centring inlet is ~0.1 K warmer. Uniformity at 17.5 g/s agrees.
+- **D serpentine**: sheet Δp 50 kPa vs 6.7 kPa laminar friction; its straight legs run at Re ≈ 3900, so the
+  laminar film used on the sheet is questionable (turbulent film moves its inlet −30.68 → −30.12 °C).
+- **A* at 5 g/s**: 112 vs 119 mK — the joint detail is resolution-sensitive.
+- Pressure drops of the coils: mine are friction-only, 2–4 kPa under the sheets (which include bends).
+
+Film sensitivity (h × 0.75): spread changes ~1 mK, inlet ~20 mK → the laminar/transitional question
+moves the inlet setting, not the uniformity.
+
+## 5. 2-D result sheets (`sheets.py`)
+
+What: one sheet per layout and flow in the same six-panel layout as the PDF (passages, inner-wall map,
+results table with sheet-vs-model columns, coolant along each passage, r–z section, wall along the height),
+plus an inlet-window chart. Output: `figs/sheets/*.png`, `figs/result_sheets_revalidated.pdf`,
+`figs/inlet_validation.png`.
+
+Meaning: "2-D" = the inner copper surface results, like the PDF. **20 of 22 centring inlets agree within
+20 mK**; the old −31.5 °C setting is outside every window.
+
+## 6. Coarse 3-D coolant CFD (`coolant_cfd.py`, `viz_coolant.py`)
+
+What: the methanol itself in 3-D — steady laminar Navier–Stokes inside the voxelised passages (artificial
+compressibility, staggered grid, 2nd-order upwind, Heun RK2, centrifugal/Coriolis terms), then one conjugate
+energy solve of methanol + copper with **no film correlation**. Grid 0.4 mm in r/z, 2° round; thin channels
+refined. Renders: methanol temperature in the passages, streamlines, pressure, tracer GIFs.
+
+Fixes needed to make it work: first-order advection was far too diffusive (9× too much friction) → 2nd-order
+upwind; plain Euler with 2nd-order upwind diverged on the finer grid → Heun RK2; a flow-rate controller speeds
+up the slow pressure build-up (steady state unchanged).
+
+Result so far (17.5 g/s):
+
+| layout | spread sheet / 1-D / CFD (mK) | inlet sheet / 1-D / CFD (°C) | rise CFD | Δp sheet / CFD (kPa) |
+|---|---|---|---|---|
+| A* | 104.4 / 101.3 / 101.9 | −30.136 / −30.149 / −30.168 | 69 mK | 32.6 / 105 |
+| P  | 71.4 / 72.5 / 71.1 | −30.118 / −30.118 / −30.143 | 66 mK | 33.1 / 74 |
+| A  | 60.0 / 60.1 / 60.3 | −30.120 / −30.120 / −30.145 | 69 mK | 32.0 / 87 |
+
+Meaning: the uniformity from a resolved film agrees within ~3 mK → the developed-flow correlations behind
+the sheets are adequate. The CFD inlet is 25–30 mK colder (coarse film). **CFD pressure drop is not a
+validation**: the voxel walls are stair-stepped (a 0.4 mm step every ~8 mm along a helix) and add form
+losses, so Δp comes out 2–3× too high; quote the 1-D values for Δp.
+
+## 7. Vapour column CFD, two-way coupled, no radiation (`vapour/room.py`, `vapour/vapour3d.py`)
+
+What: transient 3-D Boussinesq CFD of the R134a vapour (Ø27 × 423.5 mm, 1 mm grid, 0.24 M cells).
+Copper bands fixed at −15/−30 °C, ice tray 0 °C, Perspex walls and cap with a Robin law
+q = G_out (T_ext − T_w). G_out and T_ext come from my room/insulation model (same as the deck's first figure;
+with the bore adiabatic it gives 2.574 / 1.808 W, deck 2.5751 / 1.7995 W). 0–60 s one-way, from 60 s two-way
+(T_ext updated every 1 s from the room model). Pressure by an exact DCT + eigen solver (divergence 4e-11).
+
+Results 0–85 s (good): **Zone 1 draws 170–176 mW from the vapour, ice tray gives 45–51 mW**
+(deck: 172 one-way / 178 coupled with radiation; ice 51 / 49). Region means: Zone 1 vapour −26.0 to −26.8 °C
+(deck −26.5), lower connector −8.5 to −9.2 (deck −9.0), top region −0.8 to −1.0 (deck −2.8).
+
+What went wrong at ~85 s: my first two-way exchange (T_ext = T_room + q/G_out) ran away at the middle
+connector where G_out is smallest (~2.3 W/m²K): cells reached 63–126 °C, which is impossible (the vapour has
+no heat source, so it must stay between the coldest boundary, −30 °C, and the warmest, the cap at ~21 °C).
+Fix: exchange through the wall temperature and the room's admittance matrix, under-relaxed and bounded.
+Restarted from the clean **t = 75 s** snapshot (not from zero), velocity re-spun from rest, means over 85–120 s.
+
+Why the top is warm: the ~21 °C is the **cap boundary** (T_ext through 50 mm foam from the 35 °C lab), not the
+vapour. The deck has the same: its cap is 20 °C one-way and 13 °C coupled because radiation cools it. The
+vapour mean in the top region is ≈ −1 °C here vs −2.8 °C in the deck (no radiation here → warmer cap).
+
+Adiabatic cap: tried at the user's request, then reverted (user: it was a mistake). The cap is a Robin
+boundary, as in the deck. The option remains as `--cap_adiabatic` but is not used.
+
+---
+
+## Status log
+
+- 05:21 UTC — original vapour run at t = 92 s, coupling instability found; CFD A*, A done.
+- 05:40 UTC — corrected vapour run restarted from t = 75 s (Robin cap, stable coupling) → `results/vapour_run2`.
+  Original run left running to keep its 0–85 s heat history. Coolant CFD batch on B.
