@@ -142,7 +142,7 @@ def four_panel(run, fname, win=2):
     vel[:, :, :, :2] *= SR
     vel[~sec] = 0
     g.cell_data["vel"] = vel.reshape(-1, 3, order="F")
-    gp = g.cell_data_to_point_data()
+    gp = g.threshold(-1e9, scalars="T").cell_data_to_point_data()
     src = pv.PointSet(np.c_[np.random.default_rng(2).uniform(-1, 1, (900, 2)) * R_MM * SR * 0.65, np.random.default_rng(3).uniform(2, 421, 900)])
     try:
         st = gp.streamlines_from_source(src, vectors="vel", integration_direction="both", max_steps=3000,
@@ -161,6 +161,46 @@ def four_panel(run, fname, win=2):
     p.add_mesh(poly, scalars="T", cmap=CMAP, clim=CLIM, line_width=1.4, show_scalar_bar=False)
     camera(p)
     p.add_text("one instant:\nflow paths (tracers, last 2 s)", position="upper_edge", font_size=10, color="black")
+    p.screenshot(fname); p.close()
+
+
+def stream_mesh(T, u, v, w, xc, zc, sec, n_seed=900, seed=2):
+    """streamlines of a cell-centred velocity field inside the vapour only (radius drawn x SR), coloured by T"""
+    g = grid_from(T, xc, zc, sec)
+    vel = np.stack([u, v, w], axis=-1).astype(float)
+    vel[:, :, :, :2] *= SR
+    vel[~sec] = 0
+    g.cell_data["vel"] = vel.reshape(-1, 3, order="F")
+    fl = g.threshold(-1e9, scalars="T")                     # vapour cells only: no NaN in the interpolation
+    gp = fl.cell_data_to_point_data()
+    rng = np.random.default_rng(seed)
+    rr = R_MM * SR * 0.9 * np.sqrt(rng.random(n_seed)); th = 2 * np.pi * rng.random(n_seed)
+    src = pv.PointSet(np.c_[rr * np.cos(th), rr * np.sin(th), rng.uniform(2, 421, n_seed)])
+    return gp.streamlines_from_source(src, vectors="vel", integration_direction="both", max_steps=3000,
+                                      initial_step_length=0.5, max_length=400)
+
+
+def streamlines_figure(run, fname):
+    """time-mean streamlines next to the streamlines of one instant (the last full checkpoint of the run)"""
+    m = np.load(os.path.join(run, "mean_2.npz"))
+    xc, zc, sec = m["xc"], m["zc"], m["sec"]
+    ck = np.load(os.path.join(run, "checkpoint.npz"))
+    T = ck["T"].astype(float)
+    uc = 0.5 * (ck["u"][1:] + ck["u"][:-1]); vc = 0.5 * (ck["v"][:, 1:] + ck["v"][:, :-1]); wc = 0.5 * (ck["w"][:, :, 1:] + ck["w"][:, :, :-1])
+    p = pv.Plotter(off_screen=True, window_size=(1700, 1250), shape=(1, 3), border=False)
+    p.set_background("white")
+    bar = dict(title="vapour T (°C)", vertical=True, position_x=0.86, position_y=0.25, height=0.5, color="black",
+               title_font_size=12, label_font_size=10, n_labels=7)
+    p.subplot(0, 0); scenery(p)
+    st = stream_mesh(m["T"].astype(float), m["u"], m["v"], m["w"], xc, zc, sec)
+    p.add_mesh(st, scalars="T", cmap=CMAP, clim=CLIM, line_width=1.3, show_scalar_bar=False)
+    camera(p); p.add_text("streamlines of the\ntime-mean flow (85–120 s)", position="upper_edge", font_size=10, color="black")
+    p.subplot(0, 1); scenery(p)
+    st = stream_mesh(T, uc, vc, wc, xc, zc, sec)
+    p.add_mesh(st, scalars="T", cmap=CMAP, clim=CLIM, line_width=1.3, show_scalar_bar=False)
+    camera(p); p.add_text(f"streamlines at one instant\n(t = {float(ck['t']):.0f} s)", position="upper_edge", font_size=10, color="black")
+    p.subplot(0, 2); scenery(p); render_midplane(p, T, xc, zc, sec, bar=True); camera(p)
+    p.add_text(f"temperature at the same instant\n(t = {float(ck['t']):.0f} s)", position="upper_edge", font_size=10, color="black")
     p.screenshot(fname); p.close()
 
 
@@ -200,5 +240,7 @@ if __name__ == "__main__":
         frame(np.load(s), None, c["xc"], c["zc"], c["sec"], os.path.join(out, "test_frame.png"), "test")
     if what in ("all", "four"):
         four_panel(run, os.path.join(out, "vapour_3d_four.png"))
+    if what in ("all", "stream"):
+        streamlines_figure(run, os.path.join(out, "vapour_streamlines.png"))
     if what in ("all", "gif"):
         gif(run, os.path.join(out, "vapour_0_120s.gif"))

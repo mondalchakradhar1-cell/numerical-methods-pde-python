@@ -144,14 +144,14 @@ def coupling(run, room, fname):
     zr = room.vf_pos[w]
     # coupled wall temperature: the time-mean vapour field drawn through the room model with the same band
     # exchange as the run (vapour/bands.py), iterated to its fixed point
-    import bands
-    band, nb = bands.make_bands(room)
+    import bands as bandmod
+    band, nb = bandmod.make_bands(room)
     T_ext = room.T_ext0.copy()
     for it in range(40):
         col.set_bc(*v3.room_bc(col, room, T_ext))
         _, lat, capq = col.wall_heat(T)
         qv = v3.layer_heat_to_faces(col, room, lat, capq)
-        T_ext, Tsol, Tw_room, qf = bands.exchange(room, band, nb, T_ext, qv, 0.5)
+        T_ext, Tsol, Tw_room, qf = bandmod.exchange(room, band, nb, T_ext, qv, 0.5)
     Tw_cpl = Tw_room[w]
     coupling.result = dict(zone_room=room.zone_heat(Tsol), q_pmma_mW=float(qf.sum() * 1e3),
                            dT_lo=float((Tw_room - Tw_one)[w & (room.vf_pos < 60)].mean()),
@@ -188,6 +188,9 @@ if __name__ == "__main__":
     rm = roommod.Room()
     which = sys.argv[3] if len(sys.argv) > 3 else "all"
     if which in ("all", "bc"): bc_model(rm, os.path.join(out, "v_bc_model.png"))
+    if which in ("coupling",):
+        coupling(run, rm, os.path.join(out, "v_coupling.png"))
+        json.dump(coupling.result, open(os.path.join(run, "coupling_result.json"), "w"), indent=1)
     if which in ("all",):
         midplane(run, os.path.join(out, "v_midplane.png"))
         history(run, os.path.join(out, "v_history_0_60.png"), 0, 60, (25, 60))

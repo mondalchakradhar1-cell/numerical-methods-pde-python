@@ -188,3 +188,13 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   One-way (25–60 s, rebuilt from snapshots): Zone 1 175 mW, ice 47 mW, connectors 51 / 50 mW, Zone 2 +26 mW
   (deck one-way: 172, 51, 60 / 51, +9).
   Combined record for figures and the GIF: `results/vapour_combined` = run 1 (0–75 s) + run 2 (75–120 s).
+- 07:55 UTC — vapour figures done: mid-plane panels, heat histories, coupling plot (Perspex walls cool **2.4 / 2.8 / 0.26 K**
+  lower / middle / top vs deck 2.2 / 2.8 / 2.2 K with radiation), 3-D four-panel, **streamlines of the time-mean flow and
+  at one instant (t = 120 s, the full velocity checkpoint)**, and the 0–120 s GIF (mid-plane T and w in 3-D).
+- 07:55 UTC — vapour heat map (172 mW, θ–z map on the Zone 1 bore) applied to the coils: A* 17.5 g/s 101.3 → 103.5 mK,
+  inlet −9 mK; A* 5 g/s 111.8 → 114.3 mK, −19 mK; E_PDF 43.5 → 44.5 mK, −9 mK; H 69.0 → 68.8 mK, −10 mK
+  (deck with radiation: 106→111 / −10, 122→129 / −23, 40→42 / −10, 69→70 / −21) → same effect, slightly smaller without radiation.
+- 07:55 UTC — coolant CFD reruns with connected joins: E_PDF 17.5 g/s **37.3 mK, −30.107 °C, Δp 14.31 kPa** (sheet 38.0,
+  −30.124, 14.43); E_PDF 5 g/s 55.7 mK, −30.253 °C, 3.20 kPa (49.1, −30.253, 3.76); H 17.5 g/s 78.2 mK, −30.144 °C, 2.08 kPa
+  (68.6, −30.239, 3.35); H 5 g/s 96.5 mK, −30.270 °C, 0.24 kPa (80.8, −30.339, 0.52). Coolant rises now 64 / 225 mK (energy
+  conserved). H is less uniform in 3-D than on the sheet: the one-side-fed rings do not spread the coolant evenly.
