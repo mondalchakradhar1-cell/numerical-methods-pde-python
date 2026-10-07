@@ -407,7 +407,11 @@ def run(name, m_gs, iters=60000, dr=0.4, dz=0.4, nt=180, out=None, log=print):
     flux = cht3d.apply_flux(mdl, axi["surf"], mdl.Q_sheet)
     T = build_topology(g, mdl)
     log(f"  {name} {m_gs} g/s: {T['nc']:,} methanol cells, {T['nf']:,} faces, grid {g.shape}")
-    flow = solve_flow(g, mdl, T, iters=iters, log=log)
+    try:
+        flow = solve_flow(g, mdl, T, iters=iters, log=log)
+    except FloatingPointError as e:
+        log(f"  {e}; retrying with a smaller pseudo-time step (CFL 0.3)")
+        flow = solve_flow(g, mdl, T, iters=int(iters * 1.5), cfl=0.3, log=log)
     sols, gid, fl_flat, tsec = assemble_and_solve_heat(g, mdl, T, flow, flux)
     (x0, i0, r0), (x1, i1, r1) = sols
     # x = x0 + T_in * x1 ; wall at r = 13.5 (first radial layer of copper)

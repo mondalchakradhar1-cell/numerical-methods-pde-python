@@ -196,11 +196,11 @@ def build(name, m_tot, dr=0.5, dz=0.5, nt=180):
         if name == "E":
             lr0, lr1, z_lo, z_hi = 20.0, 20.5, 6.0, 91.0
             sup = (20.5, 23.5, 1.0, 6.0); ret = (22.0, 27.0, 9.0, 12.0)
-            pocket = (20.0, 20.5, 91.0, 94.0)
+            pocket = (20.0, 20.5, 90.75, 94.0)
         else:
             lr0, lr1, z_lo, z_hi = 23.75, 24.25, 5.0, 91.0
             sup = (24.25, 29.25, 1.0, 4.0); ret = (29.5, 34.5, 8.0, 11.0)
-            pocket = (23.75, 24.25, 91.0, 94.0)
+            pocket = (23.75, 24.25, 90.75, 94.0)
         w = 6.0; npair_half = 4; mb = m_tot / 8
         lane_pitch = TAU / 16
         for half in range(2):
@@ -326,7 +326,7 @@ def build(name, m_tot, dr=0.5, dz=0.5, nt=180):
     elif name == "H":
         # inlet ring (fed at theta 0, flowing both ways), 1 mm annular gap r 20-21 with axial flow, outlet ring
         nt_ = g.shape[1]
-        ring_in = (20.0, 22.0, 2.0, 6.0); ring_out = (20.0, 22.0, 91.0, 95.0)
+        ring_in = (20.0, 22.0, 2.0, 6.25); ring_out = (20.0, 22.0, 90.75, 95.0)   # overlap the gap by a fraction of a cell so the voxels connect
         arms = []
         for sgn in (1, -1):
             a0, a1 = (0.0, np.pi) if sgn > 0 else (np.pi, TAU)

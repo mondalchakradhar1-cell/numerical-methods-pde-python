@@ -171,3 +171,10 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   lower conn −9.7…−10.1 °C (deck −9.0), Zone 2 −15.3…−15.4 (−15.2), middle conn −20.7…−21.0 (−20.8), Zone 1
   −26.3…−26.5 (−26.5), top −0.85 (−2.8 with radiation); max 19.9 °C < cap 21.7 °C (physical). E_PDF 17.5 g/s CFD with
   the corrected Δp path: 16.3 kPa vs sheet 14.4 kPa.
+- 07:15 UTC — coolant CFD at 5 g/s: A 68.5 mK / −30.267 °C (sheet 68.3 / −30.284) good; P 98.3 / −30.257 (93.7 / −30.272)
+  good; E_PDF 57.9 / −30.266 (49.1 / −30.253) close. B at 5 g/s diverged → automatic retry at CFL 0.3 added.
+  **H was wrong because of a voxel bug**: the jacket ends at z < 91.0 mm and the outlet ring starts at z > 91.0 mm;
+  on the 0.4 mm grid the cell at exactly 91.0 belonged to neither → a one-cell copper seal. The port logic then put
+  a p = 0 sink at the top of the jacket and the jacket drained through it (8 m/s, rise 149 mK). Same exact-boundary
+  gap between the E / E_PDF lanes and their top pockets (16 spurious links). Joins now overlap by a fraction of a
+  cell: H, E, E_PDF have 0 links (fully connected). Rerunning H and E_PDF at both flows and B at 5 g/s.
