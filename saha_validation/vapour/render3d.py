@@ -244,3 +244,11 @@ if __name__ == "__main__":
         streamlines_figure(run, os.path.join(out, "vapour_streamlines.png"))
     if what in ("all", "gif"):
         gif(run, os.path.join(out, "vapour_0_120s.gif"))
+
+
+def mean_frame(run, fname, win=2):
+    """the GIF's two panels for the time-mean field (85-120 s), to show next to the animation"""
+    m = np.load(os.path.join(run, f"mean_{win}.npz"))
+    jm = m["sec"].shape[1] // 2
+    snap = {"Tmid": m["T"][:, jm, :], "wmid": m["w"][:, jm, :]}
+    frame(snap, None, m["xc"], m["zc"], m["sec"], fname, "time mean, t = 85–120 s")

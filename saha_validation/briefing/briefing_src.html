@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SAHA cold stage: briefing notes</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  :root { --navy: #13294B; --copper: #B87333; --card: #EEF3F8; --grey: #6B7280; --ink: #1A1F2B; }
+  body { font-family: Calibri, Carlito, "Liberation Sans", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.42; margin: 0; }
+  h1, h2, h3 { font-family: Cambria, Caladea, "Liberation Serif", Georgia, serif; color: var(--navy); }
+  h1 { font-size: 24pt; margin: 0 0 4pt; }
+  h2 { font-size: 15pt; margin: 18pt 0 6pt; padding-bottom: 3pt; border-bottom: 2px solid var(--copper); break-after: avoid; }
+  h3 { font-size: 12pt; margin: 12pt 0 4pt; break-after: avoid; }
+  .num { color: var(--copper); font-family: Cambria, Caladea, Georgia, serif; font-weight: bold; }
+  .cover { background: var(--navy); color: #fff; padding: 22pt 22pt 18pt; border-radius: 6pt; margin-bottom: 12pt; }
+  .cover h1 { color: #fff; }
+  .cover p { color: #C9D3E0; margin: 4pt 0 0; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7pt; margin: 8pt 0; }
+  .stat { background: var(--card); border-radius: 5pt; padding: 7pt 9pt; }
+  .stat .v { font-size: 17pt; color: var(--copper); font-family: Cambria, Caladea, Georgia, serif; font-weight: bold; }
+  .stat .l { font-size: 8.8pt; }
+  .take { background: var(--navy); color: #fff; font-weight: bold; padding: 6pt 10pt; border-radius: 4pt; margin: 8pt 0; break-inside: avoid; }
+  .card { background: var(--card); border-radius: 5pt; padding: 8pt 11pt; margin: 7pt 0; break-inside: avoid; }
+  .eq { background: #fff; border: 1.5px solid var(--copper); border-radius: 5pt; padding: 8pt 12pt; margin: 8pt 0; font-family: Cambria, Caladea, Georgia, serif; font-size: 11.5pt; break-inside: avoid; }
+  .eq .big { font-size: 14pt; text-align: center; margin: 4pt 0 6pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 6pt 0; }
+  tr { break-inside: avoid; } thead { display: table-header-group; }
+  th { background: var(--navy); color: #fff; text-align: left; padding: 3pt 5pt; font-weight: bold; }
+  td { padding: 2.5pt 5pt; border-bottom: 0.5pt solid #D5DCE4; }
+  tr:nth-child(even) td { background: #F7F9FC; }
+  img { width: 100%; display: block; margin: 6pt 0 2pt; }
+  .cap { font-size: 8.8pt; color: var(--grey); font-style: italic; margin-bottom: 8pt; }
+  figure { margin: 0; break-inside: avoid; }
+  .qa { break-inside: avoid; margin: 0 0 7pt; }
+  .qa .q { font-weight: bold; color: var(--navy); }
+  .qa .q::before { content: "Q. "; color: var(--copper); }
+  .qa .a::before { content: "A. "; font-weight: bold; color: var(--copper); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+  .pb { break-before: page; }
+  ul { margin: 3pt 0 3pt 14pt; padding: 0; } li { margin: 1.5pt 0; }
+  .tl td:first-child { white-space: nowrap; font-weight: bold; color: var(--navy); width: 22%; }
+  .small { font-size: 9pt; color: var(--grey); }
+  .up { color: #138A5E; font-weight: bold; } .down { color: #B4471A; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>SAHA cold stage: briefing notes</h1>
+  <p>What was done, what it shows, the heat-loss equations and sweeps, and the questions you are likely to be asked, with answers.</p>
+  <p>Companion to the presentation “SAHA cold stage: thermal design of the cold zones” · 7 Oct 2026</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">2.74 W</div><div class="l">heat into Zone 1 (−30 °C) with the moving vapour; 2.58 W by conduction alone</div></div>
+  <div class="stat"><div class="v">1.75 W</div><div class="l">heat into Zone 2 (−15 °C) with the moving vapour; 1.81 W by conduction alone</div></div>
+  <div class="stat"><div class="v">11 / 11</div><div class="l">coil layouts hold the inner wall within ±0.15 K at 17.5 and 5 g/s</div></div>
+  <div class="stat"><div class="v">≥ 94 mK</div><div class="l">margin left inside the ±0.15 K band, worst layout and flow</div></div>
+</div>
+<div class="take">Design basis: 50 mm foam (k 0.035), 35 °C lab, Zone 1 inlet ≈ −30.15 °C at 17.5 g/s (≈ −30.3 °C at 5 g/s). Flattest wall: E_PDF and B.</div>
+
+<h2>1 · What was done, step by step</h2>
+<table class="tl">
+<tr><th>Step</th><th>What was done</th><th>Result and meaning</th></tr>
+<tr><td>Geometry</td><td>All drawings, the sleeve PDF and the Fluent vapour mesh read and cross-checked.</td><td>One consistent chamber: 425 mm stack, Zone 2 copper z 60–187 mm, Zone 1 z 247–365 mm, 27 mm bore (the “30 mm bore” in the sleeve PDF is the neck outside diameter). Zone 1 copper heat capacity 634 J/K. The Fluent mesh passes the mesh check.</td></tr>
+<tr><td>Heat load</td><td>Axisymmetric conduction model of the whole stack (vapour, Perspex, foam, copper at set point, lab 35 °C with h = 8 W/m²K, ice tray 0 °C). Grids 0.25 / 0.5 / 1.0 mm.</td><td>Zone 1 <span class="num">2.579 W</span>, Zone 2 <span class="num">1.809 W</span>; 74 % of Zone 1’s heat enters through the copper end plates. Grid-independent to 0.2 %.</td></tr>
+<tr><td>Heat-load sweeps</td><td>Foam thickness 10–100 mm (3 foams), foam k 0.010–0.050 (3 thicknesses), lab temperature 20–40 °C, outer film 4–25 W/m²K, heat entry along the height.</td><td>Section 2. Heat is proportional to the temperature difference and close to proportional to foam k; it falls with thickness but more slowly than 1/t.</td></tr>
+<tr><td>Radiation</td><td>Gray-body model of the bore with exact view factors (ε copper 0.3).</td><td>37 mW into Zone 1: about 1.4 % of the load. Left out of the CFD (your decision); to be added in the detailed runs.</td></tr>
+<tr><td>Coil layouts</td><td>3-D finite-volume copper zone (r, θ, z; 1.3–1.9 M cells) with every passage built in, plus a 1-D coolant network that warms along the path. 11 layouts × 2 flows = 22 cases. Coil–buffer joint taken as ideal (your decision).</td><td>Every layout holds ±0.15 K. Ranking: E_PDF, B, E flattest (≈ 40–45 mK at 17.5 g/s), A* as built widest (101 mK). Six-panel result sheet per case.</td></tr>
+<tr><td>Corrections on the way</td><td>Model bugs found and fixed before the results above.</td><td>Contact resistance was wrongly applied across the A* plates; the jacket H film used the wrong hydraulic diameter; the E lanes were too short; three layouts had voxel gaps at a join (z = 91 mm). All fixed and re-run.</td></tr>
+<tr><td>Coolant CFD</td><td>Coarse 3-D laminar Navier–Stokes of the methanol in the passages, then one coupled heat solve with the copper. Layouts E_PDF, B, A, P, H at both flows, plus A* and C at 17.5 g/s.</td><td>Spreads within ~5 mK of the network model for the coils; E_PDF Δp 14.3 kPa. The jacket H is less uniform in 3-D (78 vs 69 mK) because its rings are fed from one side. Numerical fixes needed: second-order upwinding, RK2 time stepping, a viscous time-step limit, a local pressure step.</td></tr>
+<tr><td>Vapour column, run 1</td><td>Transient 3-D Boussinesq CFD of the R134a column, 1 mm grid, 0.24 M cells; walls from the room model. 0–60 s one-way, then face-by-face two-way exchange.</td><td>Clean to about 85 s (Zone 1 ≈ 175 mW), then the face-level exchange ran away (cells at 63–126 °C, impossible). States up to 75 s kept.</td></tr>
+<tr><td>Vapour column, run 2</td><td>Exchange through the full room admittance.</td><td>Amplified face-to-face noise about 145×; discarded.</td></tr>
+<tr><td>Cap</td><td>Adiabatic cap tried at your request, then reverted.</td><td>The cap stays a Robin (room-coupled) boundary.</td></tr>
+<tr><td>Vapour column, run 3</td><td>Same exchange applied on smooth ~10 mm bands with relaxation 0.5, restarted from the clean t = 75 s state (not from zero), run to 120 s.</td><td>Stable. Means over 85–120 s: Zone 1 wall takes <span class="num">172 ± 2.5 mW</span> from the vapour; Zone 1 total 2.737 W, Zone 2 1.748 W.</td></tr>
+<tr><td>Vapour figures</td><td>Mid-plane fields, 3-D views, streamlines of the mean flow and of one instant, the 0–120 s animation and its time-mean frame.</td><td>One slow overturning loop from the ice tray up to Zone 1; the coupled Perspex walls run 2.4–2.8 K colder than with still vapour.</td></tr>
+<tr><td>Vapour → coils</td><td>Time-mean vapour heat map on the Zone 1 bore added to the coil model.</td><td>Spread +0 to +2.5 mK, required inlet 9–19 mK colder. Every coil still holds ±0.15 K.</td></tr>
+<tr><td>Presentation</td><td>Detailed deck (97 slides) and a short deck (25 slides) in the style of the earlier SAHA decks; GIFs slowed to readable speed.</td><td>Short deck is standalone (no comparison language).</td></tr>
+</table>
+
+<h2 class="pb">2 · Heat loss: equation, proportionality and sweeps</h2>
+<h3>The heat-loss equation</h3>
+<div class="eq">
+  <div class="big">Q = ΔT / R<sub>total</sub> &nbsp;&nbsp; with &nbsp;&nbsp; ΔT = T<sub>lab</sub> − T<sub>copper</sub></div>
+  Resistances of the layers in series add: &nbsp; R<sub>total</sub> = R<sub>film</sub> + R<sub>foam</sub> + R<sub>Perspex</sub> + …<br>
+  Parallel paths (side wall, end plates, connectors, top) add as conductances: &nbsp; 1/R<sub>total</sub> = Σ 1/R<sub>i</sub><br><br>
+  Plane layer (end plates, top): &nbsp; R<sub>foam</sub> = t / (k A) &nbsp;&nbsp;→&nbsp;&nbsp; Q = k A ΔT / t &nbsp;&nbsp;(Fourier’s law)<br>
+  Cylindrical layer (side wall): &nbsp; R<sub>foam</sub> = ln(r<sub>o</sub>/r<sub>i</sub>) / (2π k L)<br>
+  Outer surface film: &nbsp; R<sub>film</sub> = 1 / (h A<sub>o</sub>) = 1 / (h · 2π r<sub>o</sub> L)<br><br>
+  Side wall of Zone 1: &nbsp; <b>Q = ΔT / [ ln(r<sub>o</sub>/r<sub>i</sub>)/(2π k L) + 1/(2π r<sub>o</sub> L h) ]</b><br>
+  <span class="small">r<sub>i</sub> = 43 mm (plate rim), r<sub>o</sub> = r<sub>i</sub> + t, L = 118 mm (Zone 1) or 127 mm (Zone 2), k = 0.035 W/m·K, h = 8 W/m²K, ΔT = 65 K (Zone 1) or 50 K (Zone 2). This side-wall-only formula gives 2.06 W for Zone 1 at 50 mm. The full chamber model gives 2.58 W: the other 0.52 W comes through the ends, plates and the Perspex/vapour paths.</span>
+</div>
+
+<h3>Heat loss is proportional to … and inversely proportional to …</h3>
+<table>
+<tr><th>Quantity</th><th>Relation</th><th>Why (from the equation)</th><th>What the full model shows</th></tr>
+<tr><td>Temperature difference ΔT = T<sub>lab</sub> − T<sub>copper</sub></td><td class="up">directly ∝</td><td>Q = ΔT / R</td><td>Exactly linear: 38.8 mW per K (Zone 1), 35.6 mW per K (Zone 2). Lab 30 → 40 °C: 2.39 → 2.77 W.</td></tr>
+<tr><td>Foam conductivity k</td><td class="up">directly ∝ (almost)</td><td>R<sub>foam</sub> ∝ 1/k</td><td>Q/k drops only about 7 % from k 0.010 to 0.050: the film resistance becomes a larger share at high k. PU (0.025) −27 %, aerogel (0.015) −56 %.</td></tr>
+<tr><td>Area: zone height L, radius</td><td class="up">directly ∝</td><td>R ∝ 1/A ∝ 1/L</td><td>The side-wall heat is per unit height (section 2, height plot); a taller zone draws proportionally more.</td></tr>
+<tr><td>Outer film coefficient h</td><td class="up">increases, weakly</td><td>R<sub>film</sub> ∝ 1/h, small next to R<sub>foam</sub></td><td>h 4 → 25 W/m²K: 2.49 → 2.64 W (+6 %).</td></tr>
+<tr><td>Foam thickness t</td><td class="down">inversely: ∝ 1/t (plane), ∝ 1/ln(r<sub>o</sub>/r<sub>i</sub>) (cylinder)</td><td>R<sub>foam</sub> ∝ t or ln(r<sub>o</sub>/r<sub>i</sub>)</td><td>Falls more slowly than 1/t: 10 → 100 mm (10×) only cuts Zone 1 from 4.71 to 2.02 W (2.3×). The cylinder’s ln grows slowly, and the Perspex/vapour/ice-tray paths do not pass through the foam.</td></tr>
+<tr><td>Total thermal resistance R</td><td class="down">inversely ∝</td><td>Q = ΔT / R</td><td>Everything above acts through R.</td></tr>
+</table>
+
+<figure><img src="../figs/hl_proportional.png"><div class="cap">Left: heat against ΔT, exactly linear. Middle: heat against foam k at 50 mm; the dotted line is exact proportionality through zero. Right: heat against thickness: full model, the side-wall formula above, and a pure 1/t law through the design point.</div></figure>
+
+<h3>Heat loss against insulation thickness</h3>
+<figure><img src="../figs/hl_thickness.png"><div class="cap">Foam thickness beyond the copper plates (radial) and above the cap (axial), changed together; lab 35 °C, h 8 W/m²K. Circle: the design point.</div></figure>
+<table>
+<tr><th>Foam thickness, mm</th><th>k 0.035 (EPS): Z1 / Z2, W</th><th>k 0.025 (PU): Z1 / Z2, W</th><th>k 0.015 (aerogel): Z1 / Z2, W</th></tr>
+{{trow}}
+</table>
+
+<h3>Heat loss against foam thermal conductivity</h3>
+<figure><img src="../figs/hl_kfoam.png"><div class="cap">Three foam thicknesses; lab 35 °C, h 8 W/m²K. Circle: the design point (50 mm, k 0.035).</div></figure>
+<table>
+<tr><th>Foam k, W/m·K</th><th>25 mm: Z1 / Z2, W</th><th>50 mm: Z1 / Z2, W</th><th>75 mm: Z1 / Z2, W</th></tr>
+{{krow}}
+</table>
+
+<h3>Heat loss along the height (length) of each zone</h3>
+<figure><img src="../figs/hl_height.png"><div class="cap">Heat into the copper per mm of height, design case. Bars: the two 11 mm end plates (most of the heat). Grey: the outer face of the copper band. Blue/orange line: the bore. With still vapour almost no heat comes through the bore; the moving vapour adds 172 mW there (section 5).</div></figure>
+<div class="card">Zone 1: plates 1.90 W (lower 0.88, upper 1.02), band outer face 0.67 W, bore 0.01 W. Zone 2: plates 1.23 W, band 0.58 W. The plates sit where the foam path to the lab is shortest and the plate area is largest, so the coil must remove most of its heat near the two ends of each zone. That is why the wall maps are warm at the ends and cold in the middle.</div>
+
+<h3>Lab temperature and outer film coefficient</h3>
+<figure><img src="../figs/hl_lab.png"><div class="cap">50 mm, k 0.035. The film coefficient matters little because the foam dominates the resistance.</div></figure>
+
+<h2 class="pb">3 · Coil layouts (Zone 1, 3-D copper + coolant network)</h2>
+<figure><img src="../figs/wallmaps_17.5.png"><div class="cap">Inner copper wall of Zone 1, unrolled (angle × height), for all 11 layouts at 17.5 g/s. Colour: wall temperature minus −30 °C, mK.</div></figure>
+<table>
+<tr><th>Layout</th><th>Spread, mK<br>17.5 / 5 g/s</th><th>Centring inlet, °C<br>17.5 / 5 g/s</th><th>Allowed inlet window, °C<br>17.5 g/s</th><th>Δp friction, kPa<br>17.5 / 5 g/s</th><th>Min margin, mK</th></tr>
+{{rows}}
+</table>
+<div class="small">Spread = max − min of the inner-wall temperature. Centring inlet = the inlet temperature that puts the wall’s mid-range at −30 °C. Window = the inlet range that keeps every point within −30 ± 0.15 °C. Δp is straight-pipe friction only (bends, fittings and manifolds add to it). Methanol at −30 °C: ρ 840 kg/m³, cp 2286 J/kg·K, μ 1.43 mPa·s, Pr 15.5.</div>
+
+<h2>4 · Coolant flow in 3-D</h2>
+<figure><img src="../figs/coolant/E_PDF_17.5_3d.png"><div class="cap">E_PDF at 17.5 g/s: methanol temperature in the passages, streamlines from the inlet, static pressure.</div></figure>
+<table>
+<tr><th>Layout</th><th>Spread, mK 17.5 / 5 g/s</th><th>Centring inlet, °C 17.5 / 5 g/s</th><th>Methanol warming, mK</th><th>Peak speed 17.5 g/s, m/s</th></tr>
+{{crow}}
+</table>
+<div class="small">Grid 0.4 mm in r and z, 2° round; thin channels refined (0.125 mm E lanes, 0.25 mm H gap). Walls are voxel stair-steps, so helix pressure drops from this CFD are upper bounds; temperatures and flow paths are the reliable output.</div>
+
+<h2 class="pb">5 · Vapour column (0–120 s, two-way coupled, no radiation)</h2>
+<div class="two">
+<figure><img src="../figs/vapour_mean_midplane.png"><div class="cap">Time mean, 85–120 s: mid-plane temperature and vertical velocity (radius drawn ×2.5).</div></figure>
+<figure><img src="../figs/vapour_streamlines.png"><div class="cap">Streamlines of the mean flow, of the instant t = 120 s, and the temperature at that instant.</div></figure>
+</div>
+<table>
+<tr><th>Heat flow (means 85–120 s)</th><th>mW</th><th>Region</th><th>Mean T, °C</th><th>rms, K</th></tr>
+<tr><td>Ice tray → vapour</td><td>49</td><td>lower connector</td><td>−9.5</td><td>1.5</td></tr>
+<tr><td>Lower Perspex connector → vapour</td><td>53</td><td>Zone 2 (wall −15)</td><td>−15.2</td><td>1.4</td></tr>
+<tr><td>Middle Perspex connector → vapour</td><td>52</td><td>middle connector</td><td>−20.9</td><td>2.3</td></tr>
+<tr><td>Vapour → Zone 1 wall</td><td>172 ± 2.5</td><td>Zone 1 (wall −30)</td><td>−26.6</td><td>1.0</td></tr>
+<tr><td>Zone 2 wall → vapour</td><td>18</td><td>top region</td><td>−0.8</td><td>0.4</td></tr>
+</table>
+<div class="card">Totals with the moving vapour: <b>Zone 1 2.737 W</b> (2.565 W room-side conduction + 0.172 W from the vapour) and <b>Zone 2 1.748 W</b>. Vertical velocity 0.03 m/s rms, peak about 0.3 m/s. Coupling cools the connector Perspex walls by 2.4 K (lower) and 2.8 K (middle).</div>
+
+<h2 class="pb">6 · Questions you are likely to be asked</h2>
+
+<h3>Heat load and insulation</h3>
+<div class="qa"><div class="q">How much heat does each zone need to remove?</div><div class="a">Zone 1 (−30 °C): 2.58 W by conduction, 2.74 W with the moving vapour column. Zone 2 (−15 °C): 1.81 W, 1.75 W with the vapour. This is for 50 mm foam (k 0.035), a 35 °C lab and h = 8 W/m²K. Radiation in the bore would add about 37 mW to Zone 1.</div></div>
+<div class="qa"><div class="q">Where does the heat come in?</div><div class="a">Mostly through the copper end plates: 74 % of Zone 1’s heat (0.88 W lower plate, 1.02 W upper plate). About 0.67 W comes through the outer face of the copper band. Almost nothing comes through the bore while the vapour is still; the moving vapour adds 0.17 W there.</div></div>
+<div class="qa"><div class="q">Why does Zone 1 get more heat than Zone 2 although it is shorter (118 vs 127 mm)?</div><div class="a">It is colder: 65 K below the lab instead of 50 K, and heat scales with ΔT. Its upper plate also faces the warm top of the stack and the cap.</div></div>
+<div class="qa"><div class="q">What is the heat-loss equation?</div><div class="a">Q = ΔT / R<sub>total</sub>, with R<sub>total</sub> the series sum of the foam and outer-film resistances. For the cylindrical side: Q = ΔT / [ln(r<sub>o</sub>/r<sub>i</sub>)/(2πkL) + 1/(2πr<sub>o</sub>Lh)]. For a flat layer: Q = kAΔT/t. Heat is proportional to ΔT, k, area and (weakly) h, and inversely proportional to thickness and total resistance (section 2).</div></div>
+<div class="qa"><div class="q">If we double the foam to 100 mm, do we halve the heat?</div><div class="a">No. Zone 1 drops from 2.58 to 2.02 W (−22 %), Zone 2 from 1.81 to 1.23 W (−32 %). For a cylinder the resistance grows with ln(r<sub>o</sub>/r<sub>i</sub>), not with t. Part of the heat also arrives through paths the foam does not cover (Perspex connectors, vapour, ice tray).</div></div>
+<div class="qa"><div class="q">Would a better insulation material help more than more thickness?</div><div class="a">Yes. At 50 mm, PU foam (k 0.025) gives 1.87 W (−27 %) and aerogel (k 0.015) gives 1.15 W (−56 %). Heat is almost proportional to k, so a better foam beats extra thickness.</div></div>
+<div class="qa"><div class="q">What if the lab is hotter?</div><div class="a">Heat rises linearly: 38.8 mW per K for Zone 1. At 40 °C, Zone 1 needs 2.77 W by conduction (about 2.94 W with the vapour). At 30 °C it needs 2.39 W.</div></div>
+<div class="qa"><div class="q">Is the 5 W design value safe?</div><div class="a">Yes. The computed load is 2.74 W for Zone 1 and 1.75 W for Zone 2, so 5 W is a 1.8–2.9× margin. At 5 W the wall spread scales up linearly (e.g. a 72 mK spread becomes about 139 mK) and needs a colder inlet, so check the band at 5 W for the chosen layout.</div></div>
+<div class="qa"><div class="q">Are the numbers grid-independent?</div><div class="a">Yes. Heat load at 0.25 / 0.5 / 1.0 mm grids: 2.581 / 2.579 / 2.576 W. Coil model at 0.25 mm (4.1 M cells): A* spread 99 vs 101 mK.</div></div>
+
+<h3>Coil layouts and coolant</h3>
+<div class="qa"><div class="q">Does every coil keep the wall within ±0.15 K?</div><div class="a">Yes, all 11 at both 17.5 and 5 g/s, with at least 94 mK to spare, as long as the inlet temperature is set right.</div></div>
+<div class="qa"><div class="q">Which layout should we build?</div><div class="a">Flattest wall: E_PDF (43 mK) and B (42 mK) at 17.5 g/s. B has the highest pressure drop of all layouts (63 kPa friction at 17.5 g/s); E_PDF needs only about 11–14 kPa. A* as built (101 mK) is the widest but still has 99 mK margin, so it is acceptable if it is already made.</div></div>
+<div class="qa"><div class="q">What inlet temperature should the chiller deliver?</div><div class="a">About −30.15 °C at 17.5 g/s and −30.3 °C at 5 g/s for most layouts (−30.12 to −30.31 °C). Exceptions: the axial serpentine D (−30.68 / −30.77 °C) and the ring channels F (−30.30 / −30.50 °C). The inlet must be below −30 °C because the methanol warms along its path and the wall sits above the coolant.</div></div>
+<div class="qa"><div class="q">Why not set −31.5 °C to be safe?</div><div class="a">It is too cold for every layout: the wall would sit 1.2–1.35 K below −30 °C. The ±0.15 K band only allows the inlet to move about ±0.1 K around the centring value.</div></div>
+<div class="qa"><div class="q">How much does the methanol warm?</div><div class="a">Q / (ṁ cp): 64 mK at 17.5 g/s and 226 mK at 5 g/s for 2.58 W. That is why the spreads are larger at 5 g/s.</div></div>
+<div class="qa"><div class="q">Is the coolant flow laminar?</div><div class="a">In the 4 mm helices at 17.5 g/s, Re ≈ 3900. For a helix with d/D ≈ 0.09 the critical Re is about 9000, so the flow stays laminar. In straight passages (D, the F spine, the H rings) Re 2000–3900 is transitional and not settled. This is the main open point; a turbulent film would move D’s inlet to about −30.12 °C.</div></div>
+<div class="qa"><div class="q">Does coolant friction heat matter?</div><div class="a">At 17.5 g/s through A* it is about 0.7 W (Δp × volume flow). That warms the bulk methanol about 17 mK more and shifts the required inlet slightly colder. It is spread along the path, so it changes the spread little. It is not included in the tables. (Estimate.)</div></div>
+<div class="qa"><div class="q">How good is the 3-D coolant CFD?</div><div class="a">It is coarse (0.4 mm cells) with stair-stepped walls. Temperatures and flow paths agree with the network model within ~5 mK for the coils; its pressure drops for the helices are too high (upper bounds). It shows one thing the 1-D model cannot: the jacket H shares its flow unevenly between rings (78 mK instead of 69 mK).</div></div>
+<div class="qa"><div class="q">What happens if the coolant stops?</div><div class="a">Zone 1 copper holds about 634 J/K. At 2.7 W it warms about 4 mK per second, so it leaves the ±0.15 K band in roughly half a minute. This is a lumped estimate; a pump-stop transient is in the next steps.</div></div>
+
+<h3>Vapour column</h3>
+<div class="qa"><div class="q">What does the vapour inside the bore do?</div><div class="a">It overturns in one slow loop. Vapour warmed by the 0 °C ice tray and the Perspex connectors rises on one side, is cooled by the Zone 1 wall and falls on the other. Velocity is about 0.03 m/s rms, peak about 0.3 m/s. The top region under the warm cap is stably stratified and nearly still.</div></div>
+<div class="qa"><div class="q">How much heat does the vapour add?</div><div class="a">172 ± 2.5 mW into Zone 1. Zone 2 gives about 18 mW to the vapour. Zone totals: 2.74 W and 1.75 W.</div></div>
+<div class="qa"><div class="q">Does that change the coil result?</div><div class="a">Barely. The spread changes by 0 to +2.5 mK and the inlet must be 9–19 mK colder. Every coil still holds ±0.15 K.</div></div>
+<div class="qa"><div class="q">Why is radiation left out?</div><div class="a">It is small: 37 mW into Zone 1 at copper emissivity 0.3, about 1.4 % of the load. It will be added in the detailed runs.</div></div>
+<div class="qa"><div class="q">How is the vapour coupled to the room, and was it stable?</div><div class="a">Every 1 s the vapour’s heat into each Perspex wall band is passed to the room/insulation model, which returns a new outside temperature for that band. Done face by face, the exchange was unstable (cells ran away after ~25 s of coupling). On smoothed ~10 mm bands with relaxation it is stable, and that is the run reported. It was restarted from the clean state at 75 s, not from zero.</div></div>
+<div class="qa"><div class="q">Is 120 s long enough?</div><div class="a">For the means, yes: the heat flows settle within about 10 s of coupling, and the 85–120 s average of the Zone 1 heat has a block scatter of ±2.5 mW. It is still one realisation on a 1 mm grid; a finer grid and longer statistics are in the next steps.</div></div>
+
+<h3>Assumptions and limits</h3>
+<div class="qa"><div class="q">What is assumed rather than computed?</div><div class="a">Material properties (foam k is the biggest one), a 35 °C lab with h = 8 W/m²K, an ideal coil–buffer joint, and manifold/gallery geometry for E, E_PDF, F and H where the drawings are not complete. Also developed-flow film coefficients in the coils, Boussinesq vapour, no condensation and no radiation in the CFD.</div></div>
+<div class="qa"><div class="q">What is the biggest uncertainty?</div><div class="a">The heat load through the foam conductivity and the lab conditions (±27 % between EPS and PU). Second is the flow regime in the straight passages at 17.5 g/s. The coil results scale linearly with the heat load, so ranking and conclusions hold.</div></div>
+<div class="qa"><div class="q">Has any of this been checked against an experiment?</div><div class="a">No. All results are simulations. Energy balances close in every case and the grids were refined. A measurement of the coil inlet/outlet temperatures and the wall spread would be the first anchor.</div></div>
+<div class="qa"><div class="q">What comes next?</div><div class="a">Settle the 17.5 g/s flow regime in the straight passages. Improve the jacket H feed or use a plenum-fed jacket. Vapour CFD on a finer grid with radiation. Pump-stop and chiller-stop transients. Then a full Fluent run of the chosen layout.</div></div>
+
+<h2 class="pb">Appendix · Consistency with the earlier studies (for your reference)</h2>
+<div class="small">This page is for you; it is not in the short presentation.</div>
+<table>
+<tr><th>Quantity</th><th>Earlier work</th><th>This study</th></tr>
+<tr><td>Zone 1 heat, conduction</td><td>2.58 W (cold-zone deck), 2.575 W (room CFD), 2.5795 W (ChatGPT review deck)</td><td>2.579 W</td></tr>
+<tr><td>Zone 2 heat, conduction</td><td>1.9 W (cold-zone deck), 1.80 W (room CFD), 1.904 W (ChatGPT review deck)</td><td>1.809 W: agrees with the room CFD; about 5 % under the other two</td></tr>
+<tr><td>Foam k sweep, Zone 1 (50 mm)</td><td>ChatGPT deck: 1.145 / 1.870 / 2.580 / 3.617 W at k 0.015 / 0.025 / 0.035 / 0.050</td><td>1.145 / 1.870 / 2.579 / 3.617 W: identical</td></tr>
+<tr><td>Thickness sweep, Zone 1 (k 0.035)</td><td>ChatGPT deck: 4.713 / 3.381 / 2.580 / 2.222 / 2.018 W at 10 / 25 / 50 / 75 / 100 mm</td><td>4.711 / 3.381 / 2.579 / 2.222 / 2.017 W: identical</td></tr>
+<tr><td>Thickness sweep, Zone 2</td><td>ChatGPT deck: 3.679 / 2.592 / 1.904 / 1.578 / 1.381 W</td><td>3.648 / 2.536 / 1.809 / 1.451 / 1.228 W: 1–11 % lower; same Zone 2 difference as above</td></tr>
+<tr><td>Side-wall analytical, Zone 1</td><td>ChatGPT deck: 2.0609 W</td><td>2.0609 W (same formula)</td></tr>
+<tr><td>Coil result sheets (22 cases)</td><td>Layout result sheets</td><td>19 / 22 spreads within 5 mK, 20 / 22 inlets within 20 mK; 18 same, 4 close, 0 different</td></tr>
+<tr><td>Jacket H, UA at 17.5 g/s</td><td>13.2 W/K</td><td>31 W/K (both gap walls are copper); inlet 111 mK warmer</td></tr>
+<tr><td>Serpentine D, Δp at 17.5 g/s</td><td>50 kPa</td><td>6.7 kPa laminar friction; regime unresolved</td></tr>
+<tr><td>Coupled vapour, Zone 1 total</td><td>2.776 W with radiation (≈ 2.742 W without)</td><td>2.737 W without radiation</td></tr>
+<tr><td>Vapour → Zone 1 wall</td><td>172 mW one-way, 178 mW coupled with radiation</td><td>172 mW coupled, no radiation</td></tr>
+<tr><td>Perspex wall cooling from coupling</td><td>2.2 / 2.8 / 2.2 K (with radiation)</td><td>2.4 / 2.8 / 0.26 K (top differs: no radiation from the cap)</td></tr>
+</table>
+
+</body>
+</html>

@@ -223,3 +223,39 @@ It builds two decks from the same results and figures:
 The detailed deck is 98 MB. `deck/split_pptx.py` splits it into 5 parts of ≤ 27 MiB each by dropping slides (no recompression), so each file fits the 30 MiB upload limit. All files pass the OOXML validator.
 
 **What it means.** The numbers are unchanged from the validated results (`results/summary.json`); only the presentation changed. The ChatGPT deck was not used as a source. Its finest chamber result (Z1 2.5795 W) agrees with ours (2.579 W).
+
+## 7 Oct: standalone short deck, slowed GIFs, heat-loss sweeps, briefing PDF
+
+**Short deck reframed.** `deck/build_present.js` builds "SAHA cold stage: thermal design of the cold zones" (25 slides). It presents the results on their own, with no comparison to the earlier decks or sheets and no re-validation wording.
+- Contents: heat load (native chart), wall maps of all 11 layouts at both flows, a spread chart, the layout table with inlet windows, E_PDF in 3-D plus its animation, and 3-D montages of methanol temperature and streamlines for six layouts.
+- Vapour section: the GIF next to the time-mean field, streamlines, regions, heat budget, effect on the coils. Then conclusions.
+
+**GIFs slowed.** The GIFs had a frame delay of 0, so they played as fast as the viewer allowed. `set_gif_delay.py` writes the delay into the graphic-control blocks; image data is untouched, and the frames were checked to be identical.
+- Vapour GIF: 0.25 s per frame (1 s of simulation per frame), 2 s hold on the last frame, about 32 s per loop.
+- Coolant GIFs: 0.15 s per frame, 1 s hold, about 8 s per loop.
+- Frames that had no timing block got a neutral one added.
+
+**Time-mean frame.** `vapour/render3d.py mean_frame` renders the GIF's two panels for the 85–120 s mean → `figs/vapour_mean_midplane.png`. Both decks now show it beside the animation.
+
+**Heat-loss sweeps.** `heatload_sweeps.py` → `results/heatload_sweeps.json`; figures from `heatload_sweep_figs.py` → `figs/hl_*.png`.
+- Thickness 10–100 mm for k 0.035 / 0.025 / 0.015.
+- Foam k 0.010–0.050 at 25 / 50 / 75 mm.
+- Lab temperature 20–40 °C; outer film coefficient h 4–25 W/m²K.
+- Heat entry along the height of each zone.
+
+Results:
+- Heat is exactly linear in ΔT: 38.8 mW/K for Z1, 35.6 mW/K for Z2.
+- It is nearly proportional to k: Q/k falls 7 % over the range.
+- It falls more slowly than 1/t: 10 → 100 mm gives Z1 4.71 → 2.02 W.
+- h matters weakly: +6 % from 4 to 25 W/m²K.
+- Z1: plates 1.90 W, band outer face 0.67 W, bore ≈ 0 (still vapour).
+- The side-wall-only formula Q = ΔT/[ln(ro/ri)/(2πkL) + 1/(2π ro L h)] gives 2.061 W for Z1; the full model gives 2.579 W.
+- The ChatGPT review deck's Z1 thickness and k sweeps are identical to ours. Its Z2 is 1–11 % higher (1.904 vs 1.809 W at the design point).
+
+**Briefing PDF.** `briefing/briefing_src.html` + `make_pdf.py` → `briefing/SAHA_briefing_notes.pdf` (13 pages). It covers:
+- the step-by-step history;
+- the heat-loss equation and a table of what the heat is proportional and inversely proportional to;
+- all sweep graphs and tables;
+- coil, coolant and vapour results;
+- about 30 likely questions with answers;
+- an appendix on consistency with the earlier studies.

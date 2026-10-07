@@ -403,14 +403,17 @@ if (V) {
     ], 9.8, 1.4, 3.1, 5.4, 13, "streamline bullets");
   }
 
-  s = content("Transient, t = 0 to 120 s (animated in slide show)", "04 · Vapour column", "Plumes form within 3 s; Zone 1 draws a steady ~170 mW once the coupling settles");
-  addFit(s, fig("vapour_0_120s.gif"), 0.4, 1.15, 7.2, 5.8, { name: "animation 0-120 s" });
+  s = content("Transient, t = 0 to 120 s, next to the time-mean field", "04 · Vapour column", "Plumes form within 3 s; Zone 1 draws a steady ~170 mW once the coupling settles");
+  s.addText("Animation, t = 0–120 s (plays in slide show)", { x: 0.5, y: 1.15, w: 5.4, h: 0.35, fontSize: 13, bold: true, color: C.text2, isTextBox: true, margin: 0, align: "center" });
+  addFit(s, fig("vapour_0_120s.gif"), 0.5, 1.5, 5.4, 5.4, { name: "animation 0-120 s" });
+  s.addText("Time mean, t = 85–120 s", { x: 6.05, y: 1.15, w: 5.4, h: 0.35, fontSize: 13, bold: true, color: C.text2, isTextBox: true, margin: 0, align: "center" });
+  addFit(s, fig("vapour_mean_midplane.png"), 6.05, 1.5, 5.4, 5.4, { name: "time mean" });
   bullets(s, [
-    "Starts from the still-vapour conduction field with a 1 mK random disturbance.",
-    "Plumes break the symmetry within 2–3 s; Zone 1 draws about 150 mW by 5 s.",
-    "0–60 s: walls one-way (T_ext frozen). 60–120 s: two-way, T_ext updated every 1 s from the room model.",
-    "Right: 2000 tracers carried by the flow, last 1 s of path, coloured by local temperature.",
-  ], 7.9, 1.4, 5.0, 5.2, 14, "gif bullets");
+    "Left of each: mid-plane temperature; right: vertical velocity.",
+    "Starts from the still-vapour field with a 1 mK disturbance.",
+    "0–60 s: walls one-way; 60–120 s: two-way, updated every 1 s.",
+    "Tracers: 2000 particles carried by the flow.",
+  ], 11.55, 1.5, 1.4, 5.3, 11, "gif bullets");
 
   s = content("Where the heat comes from and where it goes (coupled, 60–120 s)", "04 · Vapour column", `Ice tray and connectors feed ~${f0(V.coupled.ice + V.coupled.conn_lo + V.coupled.conn_mid)} mW in; the Zone 1 wall takes ${f0(-V.coupled.z1)} mW out`, true);
   addFit(s, fig("v_history_60_120.png"), 0.3, 1.15, 12.7, 4.6, { name: "history" });
