@@ -1,0 +1,32 @@
+[
+ {
+  "eps_cu": 0.05,
+  "closure_max": 2.220446049250313e-16,
+  "Z1_absorbed_mW": 15.818996864596382,
+  "Z2_absorbed_mW": 5.15010897916397,
+  "cap_emitted_mW": 26.332312373073478,
+  "bottom_emitted_mW": 3.939028251690593,
+  "pmma_emitted_mW": -9.302234781003158,
+  "sum_mW": 5.553283527470754e-13
+ },
+ {
+  "eps_cu": 0.3,
+  "closure_max": 2.220446049250313e-16,
+  "Z1_absorbed_mW": 37.264093172223134,
+  "Z2_absorbed_mW": 11.563333639936154,
+  "cap_emitted_mW": 26.88717608187578,
+  "bottom_emitted_mW": 4.164464984572808,
+  "pmma_emitted_mW": 17.775785745711232,
+  "sum_mW": 5.297411814764175e-13
+ },
+ {
+  "eps_cu": 0.9,
+  "closure_max": 2.220446049250313e-16,
+  "Z1_absorbed_mW": 50.29461070914784,
+  "Z2_absorbed_mW": 15.536648208129549,
+  "cap_emitted_mW": 27.175905001021533,
+  "bottom_emitted_mW": 4.285963677057536,
+  "pmma_emitted_mW": 34.36939023919863,
+  "sum_mW": 3.0531133177191805e-13
+ }
+]

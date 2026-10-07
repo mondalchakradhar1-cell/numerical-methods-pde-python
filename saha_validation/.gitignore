@@ -1,0 +1,5 @@
+__pycache__/
+results/vapour_run/
+results/field_*.npz
+figs/test_frame.png
+*.log
