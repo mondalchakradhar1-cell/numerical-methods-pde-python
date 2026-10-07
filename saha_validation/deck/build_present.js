@@ -267,15 +267,29 @@ const DESC = {
   G: "Two short folded coils, one in the lower and one in the upper half, each with half the flow.",
   H: "Full annular jacket: a 1 mm gap (r 20–21 mm) round the zone, inlet ring at the bottom, outlet ring at the top.",
 };
-s = content("Eleven coil types for Zone 1", SEC[2], "Helices (P, A, A*, B, C, G), axial passages (D, E, E_PDF), rings (F) and a full jacket (H)");
+const TITLE11 = { A_built: "as built", P: "plain helix", A: "folded helix", B: "two radial layers", C: "opposite-end feeds", D: "axial serpentine",
+  E: "paired axial sleeve", E_PDF: "sleeve (drawing)", F: "stacked rings", G: "two short coils", H: "annular jacket" };
+const SHORTD = { A_built: "bifilar tube wound on the buffer (as built)", P: "one helix: in at the bottom, out at the top", A: "helix up, hairpin, back down between the turns",
+  B: "inner helix up, outer helix back down", C: "two helices fed from opposite ends", D: "16 straight legs up and down",
+  E: "thin axial lanes fed by galleries", E_PDF: "axial lanes, sleeve-drawing dimensions", F: "8 rings in parallel between two spines",
+  G: "two short folded coils, fed at mid-height", H: "1 mm annular gap, rings at top and bottom" };
+s = content("Eleven coil types for Zone 1", SEC[2], "Colour = methanol temperature: blue cold at the inlet → red warm at the outlet. Copper wall and end plates solid; carrier see-through");
 ORDER.forEach((k, i) => {
   const col = i % 6, row = Math.floor(i / 6);
-  const x = 0.45 + col * 2.08, y = 1.15 + row * 2.95;
-  addFit(s, fig(`cards/${k}_17.5_3d.png`), x, y + 0.42, 2.0, 2.45, { name: `${k} 3d` });
-  s.addText([{ text: short(k) + "  ", options: { bold: true, color: HEX.accent1, fontFace: "Cambria", fontSize: 14 } },
-    { text: nm(lay(k, 17.5).name).replace(/^\S+ /, "").replace(/^as built: /, "as built: "), options: { fontSize: 10, color: HEX.dk2, bold: true } }],
-    { x, y, w: 2.05, h: 0.45, isTextBox: true, margin: 0, valign: "top" });
+  const x = 0.4 + col * 2.1, y = 1.1 + row * 2.95;
+  addFit(s, fig(`coils/${k}.png`), x, y + 0.62, 2.0, 2.3, { name: `${k} render` });
+  s.addText([{ text: short(k) + "  ", options: { bold: true, color: HEX.accent1, fontFace: "Cambria", fontSize: 15 } },
+    { text: TITLE11[k], options: { fontSize: 10.5, color: HEX.dk2, bold: true } }],
+    { x, y, w: 2.05, h: 0.32, isTextBox: true, margin: 0, valign: "top" });
+  s.addText(SHORTD[k], { x, y: y + 0.3, w: 2.05, h: 0.34, fontSize: 9, color: HEX.accent6, isTextBox: true, margin: 0, valign: "top" });
 });
+// colour key in the free cell
+s.addText([{ text: "How to read", options: { bold: true, fontFace: "Cambria", fontSize: 14, color: HEX.dk2, breakLine: true } },
+  { text: "IN / OUT arrows: where the methanol enters and leaves.", options: { fontSize: 10.5, breakLine: true } },
+  { text: "Tube colour: methanol temperature along the path, cold (blue) to warm (red).", options: { fontSize: 10.5, breakLine: true } },
+  { text: "Bronze: the inner copper wall and the two end plates; the faint shell is the copper carrier the passages sit in.", options: { fontSize: 10.5 } }],
+  { x: 10.95, y: 4.3, w: 2.0, h: 2.6, isTextBox: true, margin: 0, valign: "top", color: C.text1 });
+
 s = content("Zone 1 inner-wall spread for every coil type, at both flows", SEC[2], `All 11 coil types keep Zone 1 well inside the 300 mK band; E_PDF, B and E are the flattest`);
 s.addChart(pres.charts.BAR, [
   { name: "17.5 g/s", labels: ORDER.map(short), values: ORDER.map((k) => +lay(k, 17.5).spread.toFixed(1)) },

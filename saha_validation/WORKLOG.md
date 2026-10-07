@@ -325,3 +325,13 @@ New slide 10 in the short deck, "How the coolant inlet temperature is calculated
 6. Window: ±(150 − spread/2) mK.
 
 A table gives these for A*, P, B and E_PDF at both flows. The hand estimate is 20–90 mK warmer than the 3-D value, because the end plates bring 74 % of the heat in far from the coolant. A card explains why −31.5 °C fails (1.2–1.35 K too cold).
+
+## 7 Oct: realistic coil renders for the "Eleven coil types" slide
+
+`coil_renders.py` → `figs/coils/<layout>.png`, one per coil type at 17.5 g/s:
+- **Surfaces:** smoothed iso-surfaces (Taubin smoothing) instead of voxel blocks.
+- **Copper:** the inner copper wall and end plates are solid bronze (PBR); the carrier, buffer and tube walls are a faint see-through shell.
+- **Colour:** methanol temperature from the 3-D model on a saturated blue → purple → red scale. It is taken from the nearest coolant cell; averaging onto the surface had halved the values.
+- **IN / OUT arrows:** placed at the inlet and outlet nodes of the coolant network (rebuilt with `layouts.build`; the grid matches the stored field). Each model is rotated so its ports face the camera.
+
+Slide 12 now shows each coil with a short title, a one-line description and a "How to read" key.
