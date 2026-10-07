@@ -10,3 +10,5 @@ results/vapour_run3/
 SAHA_revalidation_FULL.pptx
 *.zip
 delivery/
+results/liquid_run/
+results/liquid_test/
