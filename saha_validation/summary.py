@@ -43,16 +43,17 @@ if os.path.exists(os.path.join(vr, "history.json")):
     H = json.load(open(os.path.join(vr, "history.json")))
     h = H["hist"]
     def mean(key, a, b):
-        v = [x[key] for x in h if a <= x["t"] <= b]
+        v = [x[key] for x in h if a <= x["t"] <= b and key in x and np.isfinite(x[key])]
         return float(np.mean(v)) if v else None
     def block_scatter(key, a, b, n=7):
-        v = np.array([x[key] for x in h if a <= x["t"] <= b])
+        v = np.array([x[key] for x in h if a <= x["t"] <= b and key in x])
         return float(np.std([c.mean() for c in np.array_split(v, n)]) / np.sqrt(n)) if len(v) else None
     out = {}
     for nm, (a, b) in (("oneway", (25, 60)), ("coupled", (85, 120))):
         out[nm] = {k: mean(k, a, b) for k in ("ice", "conn_lo", "z2", "conn_mid", "z1", "top_wall", "cap", "wrms", "T1", "T2", "T3", "T4", "T5", "storage")}
         out[nm]["z1_scatter"] = block_scatter("z1", a, b)
-        out[nm]["umax_peak"] = max(x["umax"] for x in h if a <= x["t"] <= b) if any(a <= x["t"] <= b for x in h) else None
+        um = [x["umax"] for x in h if a <= x["t"] <= b and "umax" in x]
+        out[nm]["umax_peak"] = max(um) if um else None
     out["conduction_heat_mW"] = H["conduction_heat_mW"]
     out["grid"] = H["grid"]; out["seconds"] = H["seconds"]; out["steps"] = H["steps"]
     out["room_zone_heat_final"] = H["room_zone_heat_final"]

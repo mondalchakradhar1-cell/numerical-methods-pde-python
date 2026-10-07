@@ -198,3 +198,8 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   −30.124, 14.43); E_PDF 5 g/s 55.7 mK, −30.253 °C, 3.20 kPa (49.1, −30.253, 3.76); H 17.5 g/s 78.2 mK, −30.144 °C, 2.08 kPa
   (68.6, −30.239, 3.35); H 5 g/s 96.5 mK, −30.270 °C, 0.24 kPa (80.8, −30.339, 0.52). Coolant rises now 64 / 225 mK (energy
   conserved). H is less uniform in 3-D than on the sheet: the one-side-fed rings do not spread the coolant evenly.
+- 08:15 UTC — **coolant CFD complete for the chosen set** (both flows): B 5 g/s 60.5 mK / −30.244 °C (sheet 61.0 / −30.248)
+  after one automatic retry at CFL 0.3. Full table in the deck. **Deck rebuilt: `SAHA_revalidation.pptx` (42 slides)** —
+  overview and verdict, geometry and heat load, 11 archetypes (1-D model, result sheets, inlet windows), 3-D coolant CFD
+  (table, per-layout 3-D renders, tracer GIFs), coupled vapour column (model, coupling fix, mid-plane, 3-D, streamlines
+  mean + instant, 0–120 s GIF, heat flows, Perspex coupling, deck comparison, coil effect), limits and next steps.

@@ -139,7 +139,7 @@ bullets(s, [
   `Zone 2 conducts ${f2(base.Q2)} W, not the 1.9 W of the cold-zone deck (the room CFD's 1.80 W agrees with me).`,
   `Jacket H: the sheet's UA of ${f1(H17.UA_sheet)} W/K fits one wetted wall; with copper on both sides UA ≈ ${f0(H17.UA)} W/K and the inlet is ${f0((H17.inlet - H17.inlet_sheet) * 1000)} mK warmer.`,
   `Serpentine D: ${f1(D17.dp)} kPa laminar friction vs ${f1(D17.dp_sheet)} kPa on the sheet, while its film is taken laminar at Re ≈ 3900.`,
-  `As-built A* at 5 g/s: ${f0(A5.spread)} vs ${f0(A5.spread_sheet)} mK; the solder/gap detail is grid-sensitive.`,
+  `Jacket H in the 3-D coolant CFD: ${(S.coolant_cfd || []).find((r) => r.layout === "H" && r.m_gs === 17.5) ? f0(S.coolant_cfd.find((r) => r.layout === "H" && r.m_gs === 17.5).spread_mK) : "–"} mK vs 69 mK: its rings spread the coolant unevenly.`,
 ], 7.0, 3.9, 5.6, 2.9, 13, "differs list");
 
 // ================================================================= 3 method
@@ -277,7 +277,8 @@ note(s, `Grey bars: the result sheets' allowed inlet windows; coloured bars: thi
 for (const k of ["A_built_17.5", "E_PDF_17.5"]) {
   const f = fig(`sheets/${k}.png`);
   if (!fs.existsSync(f)) continue;
-  s = content(`Re-validated result sheet: ${k.replace("A_built", "A*").replace("_", " at ")} g/s`, "B · Coil archetypes in 3-D");
+  const [lk, lf] = [k.slice(0, k.lastIndexOf("_")), k.slice(k.lastIndexOf("_") + 1)];
+  s = content(`Re-validated result sheet: ${short(lk)} at ${lf} g/s`, "B · Coil archetypes in 3-D");
   addFit(s, f, 0.4, 1.1, 12.5, 5.85, { name: `sheet ${k}` });
 }
 
@@ -291,24 +292,27 @@ if (S.coolant_cfd && S.coolant_cfd.length) {
   s = content("Coolant CFD set-up", "B2 · 3-D coolant CFD");
   bullets(s, [
     "Same cylindrical grid as the layout model, refined: 0.4 mm in r and z, 2° round; thin channels refined to 0.125 mm (E lanes) and 0.25 mm (H gap). 0.07–0.4 M methanol cells per layout.",
-    "Steady incompressible laminar Navier–Stokes by artificial compressibility, staggered faces, second-order upwind advection, Heun (RK2) pseudo-time, centrifugal and Coriolis terms of the curved channels.",
+    "Steady incompressible laminar Navier–Stokes by artificial compressibility, staggered faces, second-order upwind advection, Heun (RK2) pseudo-time, centrifugal and Coriolis terms of the curved channels. Joins between passages overlap by a fraction of a cell so the voxels connect.",
     "Inlet: a volume source in the first 2 mm of the passage; outlet: p = 0. Hairpins and the radial link of B are mass + mixed-enthalpy links.",
     "Then one conjugate energy solve: methanol + copper + foam, upwind advection with the CFD fluxes, the same external heat as the layout model.",
     "Limit: walls are voxel stair-steps (one 0.4 mm step every ~8 mm along a helix), which adds form losses: CFD Δp is an upper bound. Heat transfer, temperatures and flow paths are the useful output.",
   ], 0.5, 1.35, 12.3, 5.4, 15, "cfd setup");
 
-  const CR = [["Layout, 17.5 g/s", "Spread, mK\nsheet / 1-D / CFD", "Inlet, °C\nsheet / 1-D / CFD", "Coolant rise, mK\n1-D / CFD", "Δp, kPa\nsheet / 1-D / CFD", "Peak speed, m/s"]];
+  const CR = [["Layout, flow", "Spread, mK\nsheet / 1-D / CFD", "Inlet, °C\nsheet / 1-D / CFD", "Coolant rise, mK\n1-D / CFD", "Δp, kPa\nsheet / 1-D / CFD", "Check"]];
   const order2 = ["A_built", "P", "A", "B", "C", "D", "E", "E_PDF", "F", "G", "H"];
-  order2.forEach((k) => {
-    const c = S.coolant_cfd.find((r) => r.layout === k && Math.abs(r.m_gs - 17.5) < 1e-6);
-    const a = lay(k, 17.5);
+  [17.5, 5].forEach((fl) => order2.forEach((k) => {
+    const c = S.coolant_cfd.find((r) => r.layout === k && Math.abs(r.m_gs - fl) < 1e-6);
+    const a = lay(k, fl);
     if (!c) return;
-    CR.push([TD(short(k), { bold: true }), TD(`${f0(a.spread_sheet)} / ${f0(a.spread)} / ${f0(c.spread_mK)}`), TD(`${f3(a.inlet_sheet)} / ${f3(a.inlet)} / ${f3(c.inlet_C)}`),
-      TD(`${f0(a.rise)} / ${f0(c.rise_mK)}`), TD(`${f1(a.dp_sheet)} / ${f1(a.dp)} / ${f1(c.dp_kPa)}`), TD(f2(c.umax))]);
-  });
+    const ds = Math.abs(c.spread_mK - a.spread_sheet), di = Math.abs(c.inlet_C - a.inlet_sheet);
+    const v = ds <= 5 && di <= 0.03 ? "ok" : ds <= 10 && di <= 0.1 ? "close" : "bad";
+    CR.push([TD(`${short(k)}, ${fl} g/s`, { bold: true, fontSize: 10 }), TD(`${f1(a.spread_sheet)} / ${f1(a.spread)} / ${f1(c.spread_mK)}`, { fontSize: 10 }),
+      TD(`${f3(a.inlet_sheet)} / ${f3(a.inlet)} / ${f3(c.inlet_C)}`, { fontSize: 10 }), TD(`${f0(a.rise)} / ${f0(c.rise_mK)}`, { fontSize: 10 }),
+      TD(`${f1(a.dp_sheet)} / ${f1(a.dp)} / ${f1(c.dp_kPa)}`, { fontSize: 10 }), verdictCell(v)]);
+  }));
   s = content("Coolant CFD against the sheets and the 1-D network model", "B2 · 3-D coolant CFD");
-  s.addTable(CR.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 0.5, y: 1.3, w: 12.3, colW: [1.6, 2.4, 3.1, 1.7, 2.3, 1.2], rowH: 0.42, border: TB, objectName: "cfd table" });
-  note(s, "Spread and inlet from the CFD come from a resolved (coarse) film instead of a correlation; agreement here means the developed-flow correlations used by the sheets are adequate for these geometries.", 0.5, 6.35, 12.3, 0.55, 11);
+  s.addTable(CR.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 0.5, y: 1.25, w: 12.3, colW: [1.6, 2.6, 3.2, 1.6, 2.3, 1.0], rowH: 0.38, border: TB, objectName: "cfd table" });
+  note(s, "Layouts chosen with the user: the two flattest on the sheets (E_PDF, B), folded bifilar A, plain helix P, jacket H, plus the as-built A*. CFD Δp of the helices is high because the voxel walls are stair-stepped; E_PDF and H have straight walls and their Δp is close to the sheets. H is less uniform in 3-D: its one-side-fed rings do not spread the coolant evenly.", 0.5, 6.2, 12.3, 0.75, 10.5);
 
   for (const k of order2) {
     const f3d = fig(`coolant/${k}_17.5_3d.png`), fp = fig(`coolant/${k}_17.5_paths.png`);
@@ -338,6 +342,21 @@ s = content("Model: the vapour column, with walls from the room model", "C · Co
 addFit(s, fig("v_bc_model.png"), 0.4, 1.2, 12.5, 5.0, { name: "bc model" });
 note(s, "T_ext and G_out come from my axisymmetric room / insulation model: G_out is the collective response of each Perspex face to the vapour being raised 1 K. With the bore adiabatic it gives Zone 1 2.574 W and Zone 2 1.808 W (coupled deck: 2.5751 / 1.7995 W).", 0.5, 6.3, 12.3, 0.6, 11);
 
+s = content("Making the two-way exchange stable", "C · Coupled vapour column");
+const steps2 = [
+  ["Run 1", "Face-by-face exchange T_ext = T_room + q / G_out", "Ran away after ~25 s of coupling at the middle connector (G_out ≈ 2.3 W/m²K): vapour cells at 63–126 °C, impossible without a heat source. 0–75 s kept (clean)."],
+  ["Run 2", "Exchange through the room's full face admittance", "Its diagonal is ~145× G_out·A, so face-to-face noise was amplified: middle-connector T_ext +18 K on average. Bounded, but wrong: discarded."],
+  ["Run 3", "Same deck exchange on smooth ~10 mm bands, relaxed", "Stable in ~10 exchanges offline; restarted from the clean t = 75 s state. This is the run reported here (85–120 s means)."],
+];
+steps2.forEach((st, i) => {
+  const y = 1.35 + i * 1.75;
+  card(s, 0.5, y, 12.3, 1.6, `coupling step ${i}`);
+  s.addText(st[0], { x: 0.7, y: y + 0.15, w: 1.4, h: 0.5, fontFace: "Cambria", fontSize: 18, bold: true, color: i === 2 ? C.accent4 : C.accent5, isTextBox: true, margin: 0 });
+  s.addText(st[1], { x: 2.2, y: y + 0.15, w: 10.4, h: 0.45, fontSize: 15, bold: true, color: C.text1, isTextBox: true, margin: 0 });
+  s.addText(st[2], { x: 2.2, y: y + 0.65, w: 10.4, h: 0.85, fontSize: 13, color: C.text1, isTextBox: true, margin: 0, valign: "top" });
+});
+note(s, "Why it matters: for one 0.5 mm strip of Perspex the room is far stiffer than the smooth G_out law says, so a face-level update over-corrects and grows. The deck's exchange is fine once it is applied to smoothed (row-averaged) quantities, as the deck did.", 0.5, 6.6, 12.3, 0.4, 10.5);
+
 if (V) {
   s = content("Mid-plane: still vapour, time mean and one instant", "C · Coupled vapour column");
   addFit(s, fig("v_midplane.png"), 0.4, 1.15, 12.5, 5.8, { name: "midplane" });
@@ -350,6 +369,16 @@ if (V) {
   RN.forEach((n, i) => VT.push([TD(n, { fontSize: 10 }), TD(`${f1(dT[i])} / ${f1(V.T_mean[i + 1])}`, { fontSize: 10 }), TD(`${f1(dR[i])} / ${f1(V.T_rms[i + 1])}`, { fontSize: 10 })]));
   s.addTable(VT.map((r, i) => i === 0 ? r.map(HDR) : r), { x: 9.45, y: 1.4, w: 3.45, colW: [1.35, 1.1, 1.0], rowH: 0.48, border: TB, objectName: "region table" });
   note(s, `Time means over 85–120 s. Vertical velocity ${f3(V.w_rms_stat)} m/s rms (deck 0.032). Radius drawn ×2.5; copper = Zones 2 (lower) and 1; blue glass = Perspex; dark slab = ice tray. Deck values include radiation.`, 9.45, 4.6, 3.45, 2.2, 11);
+
+  if (fs.existsSync(fig("vapour_streamlines.png"))) {
+    s = content("Streamlines: the time-mean flow and one instant", "C · Coupled vapour column");
+    addFit(s, fig("vapour_streamlines.png"), 0.3, 1.1, 9.3, 5.85, { name: "vapour streamlines" });
+    bullets(s, [
+      "Left: streamlines of the time-mean velocity (85–120 s): a slow loop from the ice tray up to Zone 1 and back.",
+      "Middle: streamlines of the full velocity field at t = 120 s: the cold stream falling from Zone 1 and the warm stream rising from the ice tray twist round each other in the middle connector.",
+      "The top region is stably stratified: closed, slow cells under the cap.",
+    ], 9.8, 1.4, 3.1, 5.4, 13, "streamline bullets");
+  }
 
   s = content("Transient, t = 0 to 120 s (animated in slide show)", "C · Coupled vapour column");
   addFit(s, fig("vapour_0_120s.gif"), 0.4, 1.15, 7.2, 5.8, { name: "animation 0-120 s" });
@@ -413,12 +442,16 @@ const VD = [["Claim", "Decks", "This re-validation", "Same?"],
   ["Jacket H film and inlet", "UA 13.2 W/K, −30.239 °C", `UA ${f0(H17.UA)} W/K, ${f3(H17.inlet)} °C (both walls wetted)`, "bad"],
   ["Serpentine D pressure drop", "50 kPa", `${f1(D17.dp)} kPa laminar; regime unresolved`, "bad"],
 ];
+const cfdE = (S.coolant_cfd || []).find((r) => r.layout === "E_PDF" && Math.abs(r.m_gs - 17.5) < 1e-6);
+const cfdH = (S.coolant_cfd || []).find((r) => r.layout === "H" && Math.abs(r.m_gs - 17.5) < 1e-6);
+if (cfdE) VD.push(["E_PDF in 3-D coolant CFD (17.5 g/s)", "38 mK, 14.4 kPa", `${f0(cfdE.spread_mK)} mK, ${f1(cfdE.dp_kPa)} kPa`, "ok"]);
+if (cfdH) VD.push(["Jacket H in 3-D coolant CFD (17.5 g/s)", "69 mK", `${f0(cfdH.spread_mK)} mK: rings spread the flow unevenly`, "close"]);
 if (V) {
   VD.push(["Vapour convection into Zone 1", "172–178 mW", `${f0(-V.coupled.z1)} mW (no radiation)`, Math.abs(-V.coupled.z1 - 175) < 20 ? "ok" : "close"]);
   VD.push(["Zone 1 total with the vapour", "2.732 W one-way / 2.776 W", `${f3(Z1c)} W (no radiation)`, Math.abs(Z1c - 2.742) < 0.03 ? "ok" : "close"]);
 }
 s.addTable(VD.map((r, i) => i === 0 ? r.map(HDR) : [TD(r[0]), TD(r[1]), TD(r[2]), verdictCell(r[3])]),
-  { x: 0.5, y: 1.3, w: 12.3, colW: [4.0, 3.3, 3.8, 1.2], rowH: 0.48, border: TB, objectName: "verdict table" });
+  { x: 0.5, y: 1.25, w: 12.3, colW: [4.0, 3.3, 3.8, 1.2], rowH: 0.43, border: TB, objectName: "verdict table" });
 
 s = content("Limits of this check, and the deeper study it sets up", "D · Verdict");
 card(s, 0.5, 1.35, 6.0, 5.4, "limits card");
