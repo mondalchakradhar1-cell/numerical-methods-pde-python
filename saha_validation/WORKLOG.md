@@ -259,3 +259,32 @@ Results:
 - coil, coolant and vapour results;
 - about 30 likely questions with answers;
 - an appendix on consistency with the earlier studies.
+
+## 7 Oct: short deck restructured (user review)
+
+Changes requested on the short deck (`deck/build_present.js`), now 39 slides:
+
+**Removed**
+- The four-step method slide.
+- The two wall-map slides.
+- The E_PDF tracer GIF slide.
+- The coolant path plots under the E_PDF 3-D view.
+- The Perspex coupling plot on the vapour heat slide.
+
+**Heat section, added at the start**
+- A heat budget for both zones by path: end plates, outer band face, bore, the change when the vapour moves, vapour convection, and radiation (not included).
+- How the heat load builds up, model by model: hand calculation, chamber model, finest grid, plus vapour, plus radiation. This is the user's vapour-deck slide 11, redrawn with our numbers only.
+- The heat-loss equation with a table of what the heat is proportional and inversely proportional to.
+- Thickness, conductivity and height plots.
+
+**Coil types**
+- An overview slide of the 11 types in 3-D.
+- One slide per type: `archetype_cards.py` → `figs/cards/*`, with the 3-D passages, the r–z cross-section, the inner-wall contour and the wall along the height, plus five key numbers and a one-line description.
+- The spread chart is now labelled Zone 1.
+
+**Vapour**
+- Cross-sections at five heights (`vapour/sections.py` → `figs/vapour_sections.png`): the t = 120 s instant and the 85–120 s mean. User's vapour-deck slide 7.
+- The 3-D four-view with the region table and a "What to take from it" card. Slide 6.
+- The 0–120 s heat-flow history (`vapour/heatflow_fig.py` → `figs/v_heatflow_0_120.png`). Slide 8.
+
+**Physics wording corrected.** The time-mean vapour falls along the cold Zone 1 wall and rises in the core; in the connectors it rises along the warm Perspex. At any instant the two streams are side by side, not axisymmetric. The briefing sentence was updated to match.
