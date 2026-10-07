@@ -151,3 +151,19 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   saved 3-D temperature snapshots at 1 s resolution (`vapour/history_from_snaps.py` → `history_rebuilt.json`):
   exact for the one-way phase (0–60 s), approximate for 60–85 s (uses the one-way T_ext).
   The coupled results (85–120 s means) come from `results/vapour_run2` (restart at 75 s, stable coupling, Robin cap).
+- 06:20 UTC — **coupling, second attempt failed too, third attempt works.**
+  * Exchange through the room's full face admittance matrix (05:40 run): its diagonal is ~145× the local G_out·A,
+    so face-to-face noise of the vapour wall temperature was amplified into T_ext (middle connector +18 K on
+    average). Temperatures stayed bounded but the result was wrong → run discarded.
+  * Root cause of both failures: exchanging at the room model's 0.5 mm face resolution. For one thin strip the
+    room is far stiffer than G_out says, so a face-level update over-corrects and grows (tested offline on a frozen
+    vapour field: diverges with and without relaxation).
+  * Fix (`vapour/bands.py`): the deck's own exchange, T_ext = T_wall(room, q drawn) + q/G_out, applied on smooth
+    bands (~10 mm on the walls, 3 rings on the cap), under-relaxed 0.5. Offline it converges in ~10 exchanges and
+    cools the Perspex walls by **2.3 K (lower), 2.3 K (middle), 0.35 K (top)** — deck with radiation 2.2/2.8/2.2 K.
+  * Restarted again from the clean t = 75 s snapshot → `results/vapour_run2`.
+- 06:20 UTC — coolant CFD fixes: (1) viscous step limit 0.2 h²/ν was above the 3-D stability limit h²/(6ν) → 0.1;
+  (2) the pressure update now uses the local speed, β ≥ 1 m/s, and layouts with manifolds start from p = 0 —
+  fixes the 5 g/s divergence; (3) "links" (hairpin-type joins) only for one-to-one series joins — the H jacket's
+  collector had been mistaken for a hairpin (its 163 mK rise was an artifact); (4) Δp now follows the worst series
+  path (E_PDF's 109 kPa had summed parallel lanes). Rerunning E_PDF and H at 17.5 g/s and the five layouts at 5 g/s.

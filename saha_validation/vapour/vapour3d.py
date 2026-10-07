@@ -464,6 +464,8 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
     os.makedirs(out, exist_ok=True)
     t0w = time.time()
     room = roommod.Room()
+    import bands
+    band_id, n_band = bands.make_bands(room)
     col = Column(dx_mm)
     T_ext = room.T_ext0.copy()
     col.set_bc(*room_bc(col, room, T_ext))
@@ -568,13 +570,9 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
         if t >= t_couple and t >= next_ex - 1e-9:
             lat_m = np.mean([x[1] for x in lat_buf], axis=0); cap_m = np.mean([x[2] for x in lat_buf], axis=0)
             qf = layer_heat_to_faces(col, room, lat_m, cap_m)
-            # stable exchange: vapour-side wall temperature -> exact room heat (admittance matrix) -> T_ext
-            GA = room.G_out * room.vf_A
-            Tw_vap = T_ext - qf / GA
-            q_exact = room.Y @ (room.T_ext0 - Tw_vap)
-            T_new = np.clip(Tw_vap + q_exact / GA, -30.0, 35.0)
-            T_ext = T_ext + RELAX * (T_new - T_ext)
-            Tsol, Tw_room = room.solve(q_exact)
+            # deck exchange T_ext = T_wall(room, q drawn) + q / G_out, on smooth bands (bands.py), under-relaxed
+            T_ext, Tsol, Tw_room, q_s = bands.exchange(room, band_id, n_band, T_ext, qf, RELAX)
+            qf = q_s
             col.set_bc(*room_bc(col, room, T_ext))
             Zheat_room = room.zone_heat(Tsol)
             cpl_log.append(dict(t=t, q_pmma_mW=float(qf.sum() * 1e3), T_ext_conn_mean=float(T_ext[room.vf_kind == "wall"].mean()),

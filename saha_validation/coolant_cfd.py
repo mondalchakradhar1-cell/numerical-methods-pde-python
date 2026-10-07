@@ -160,7 +160,7 @@ def mom_step(U, Un, p, L, R, D, H, RF, nbf, tr, size, nu, beta, cfl, dts, active
             src = -vt[0] * u / RF[f]
         dpdx = (p[r] - p[l]) / H[f]
         hmin = min(H[f], min(size[l, 0], min(size[l, 1], size[l, 2])))
-        dt = min(cfl * hmin / (abs(u) + beta), 0.2 * hmin * hmin / nu)
+        dt = min(cfl * hmin / (abs(u) + beta), 0.1 * hmin * hmin / nu)   # 3-D explicit viscous limit is h^2/(6 nu)
         dts[f] = dt
         Un[f] = u + dt * (-adv + nu * lap + src - dpdx)
 
@@ -170,9 +170,11 @@ def p_step(U, p, cface, A, vol, Sv, fixed, size, beta, cfl, div_out):
     nc = p.shape[0]
     for c in nb.prange(nc):
         flux = 0.0
+        umax = 0.0
         for s in range(6):
             f = cface[c, s]
             if f >= 0:
+                umax = max(umax, abs(U[f]))
                 if s % 2 == 1:
                     flux += A[f] * U[f]
                 else:
@@ -182,7 +184,7 @@ def p_step(U, p, cface, A, vol, Sv, fixed, size, beta, cfl, div_out):
         if fixed[c]:
             continue
         hmin = min(size[c, 0], min(size[c, 1], size[c, 2]))
-        dt = cfl * hmin / beta
+        dt = cfl * hmin / (umax + beta)
         p[c] -= dt * beta * beta * dv
 
 
@@ -210,6 +212,8 @@ def ports(g, mdl, T):
         ups = mdl.nodes_up[n0]
         if n0 in mdl.inlets or not ups:
             continue
+        if len(ups) != 1:
+            continue                                   # manifolds / collectors are geometric, never links
         for (j, mj) in ups:
             cj = cells_of.get(j, []); c0 = cells_of.get(n0, [])
             if not cj or not c0:
@@ -261,8 +265,12 @@ def solve_flow(g, mdl, T, iters=60000, cfl=0.5, check=1000, tol=2e-3, log=print)
     Lp = np.array([p_["L"] for p_ in mdl.passages]) * 1e-3
     p = (dp_p[pid_c] * np.clip(1 - s_c / Lp[pid_c], 0, 1) + down[pid_c])
     p[np.array([c for cs in outs for c in cs], dtype=np.int64)] = 0.0
+    taps = any(len(mdl.nodes_up[q["first"]]) == 1 and mdl.nodes_up[q["first"]][0][0] != mdl.passages[mdl.nodes_pid[mdl.nodes_up[q["first"]][0][0]]]["last"]
+               for q in mdl.passages if mdl.nodes_up[q["first"]])
+    if taps:
+        p[:] = 0.0          # manifolds: per-passage 1-D pressures do not match at the taps; let the controller build p
     Un = U.copy(); U2 = U.copy(); dts = np.zeros(nf); div = np.zeros(nc)
-    beta = 2.5 * Umean.max()
+    beta = max(2.5 * Umean.max(), 1.0)
     active = np.ones(nf, np.bool_)
     t0 = time.time()
     hist = []
@@ -417,8 +425,27 @@ def run(name, m_gs, iters=60000, dr=0.4, dz=0.4, nt=180, out=None, log=print):
     Tfield = Tc0 + Tin * Tc1
     # pressure drop: inlet port mean pressure (sum over series links)
     pin = [float(flow["p"][np.array(c)].mean()) for c, _, l in flow["src"]]
-    links = [l is not None for _, _, l in flow["src"]]
-    dp_series = sum(pin) if any(links) else max(pin)
+    # worst series path: a link source adds the entry pressure of the passage that feeds it (recursively)
+    pid_f = mdl.pid[mdl.mat == 3]
+    node_f = mdl.node[mdl.mat == 3]
+    src_of_pid = {}
+    for i_, (c, _, l) in enumerate(flow["src"]):
+        src_of_pid.setdefault(int(pid_f[np.array(c)][0]), i_)
+    def entry(q, depth=0):
+        if depth > 50:
+            return 0.0
+        i_ = src_of_pid.get(q)
+        if i_ is not None:
+            return total(i_, depth + 1)
+        first = mdl.passages[q]["first"]
+        cells = np.nonzero(node_f == first)[0]
+        return float(flow["p"][cells].mean()) if len(cells) else 0.0
+    def total(i_, depth=0):
+        c, _, l = flow["src"][i_]
+        if l is None:
+            return pin[i_]
+        return pin[i_] + entry(int(pid_f[np.array(l)][0]), depth + 1)
+    dp_series = max(total(i_) for i_ in range(len(flow["src"])))
     # outlet temperature: mean over outlet cells
     Tf = Tfield[mdl.mat == 3]
     Tout = float(np.mean([Tf[np.array(c)].mean() for c in flow["outs"][: len(mdl.outlets)]]))
