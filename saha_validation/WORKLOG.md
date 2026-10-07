@@ -379,3 +379,15 @@ The user clarified the chamber: superheated R134a liquid sits in the lower chamb
   - With pressure set by Zone 1 (84.4 kPa): liquid at 0 °C gives E_c = 139 keV (≥ 65 keV even with a −60 °C condenser); 20 °C gives 10 keV; 30 °C gives 3.2 keV.
   - dp/dT at −30 °C is 4.0 kPa/K, so ±0.15 K moves E_c by only 0.2–0.8 %. The threshold is far more sensitive to the liquid temperature: 11–15 %/K.
 - `wimp/SAHA_WIMP_bubble_chamber.pdf`: 4-page write-up.
+
+## 7 Oct: chamber configurations and bubble growth / rise
+
+- `bubble/configs_schematic.py` → `figs/chamber_configs.png`. The lower part is generic until the drawing arrives. Four setups:
+  - **A, condenser-set:** p = p_sat(−30 °C) = 84.4 kPa; liquid in the cone, vapour above.
+  - **B, high fill:** liquid up into Zone 2, which then boils it while Zone 1 condenses it (a heat pipe between the zones).
+  - **C, pressurised liquid-filled:** p set by a bellows; superheat by expansion, PICO-style.
+  - **D, gas-buffered:** an inert gas sets the total pressure.
+- `bubble/bubble_growth.py` → `figs/bubble_growth.png`, `results/bubble_growth.json`. Mikić–Rohsenow–Griffith growth plus quasi-steady Mendelson rise.
+  - Setup A: R(1 ms) = 0.7–1.3 mm. After 30–100 mm of rise the bubble is 8.5–23 mm in radius and carries 2.5–48 J to Zone 1, which warms the Zone 1 copper by 4–75 mK per event. Bubbles grow larger than the bore, giving geyser-like events.
+  - Setup C (400 kPa, 30 °C): bubbles of 2–3 mm, 0.1–0.5 J.
+- `bubble/bubble_anim.py` → `figs/bubble_event.gif` (setup A, liquid 20 °C, 60 mm of liquid): nucleation, growth while rising, the vapour slug reaching Zone 1. 17.7 J per event, +28 mK on the Zone 1 copper.
