@@ -5,3 +5,4 @@ figs/test_frame.png
 *.log
 results/coolant_*.npz
 figs/coolant/_f.png
+results/vapour_run2/

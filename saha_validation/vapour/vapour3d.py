@@ -27,6 +27,7 @@ RHO, CP, KV, MU, BETA = 4.2254, 786.6, 0.009788, 1.0041e-5, 3.874e-3
 NU, ALPHA, G = MU / RHO, KV / (RHO * CP), 9.81
 T_REF = -15.0
 R, H = 13.5e-3, 423.5e-3
+RELAX = 0.5
 REGIONS = ["ice", "conn_lo", "z2", "conn_mid", "z1", "top_wall", "cap"]
 
 
@@ -454,7 +455,7 @@ def layer_heat_to_faces(col, room, lat_mean, cap_mean):
 
 
 def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, hist_dt=0.05, npart=2000, seed=1,
-        win1=(25.0, 60.0), win2=(85.0, 120.0)):
+        win1=(25.0, 60.0), win2=(85.0, 120.0), restart=None):
     import room as roommod
     out = out or os.path.join(HERE, "out")
     os.makedirs(out, exist_ok=True)
@@ -478,8 +479,16 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
     rr = R * 0.95 * np.sqrt(rng.random(npart)); th = 2 * np.pi * rng.random(npart)
     P = np.c_[rr * np.cos(th), rr * np.sin(th), H * rng.random(npart)]
     t, dt_prev, step = 0.0, None, 0
+    if restart:
+        rs = np.load(restart)
+        t = float(rs["t"])
+        if "u" in rs:
+            u[:], v[:], w[:] = rs["u"], rs["v"], rs["w"]
+        T = np.where(col.fl, rs["T"].astype(float), 0.0) + 1e-3 * rng.standard_normal(T.shape) * col.fl
+        print(f"restart from {restart} at t = {t:.2f} s (velocity {'restored' if 'u' in rs else 'from rest'})", flush=True)
     hist = []; snaps_t = []
-    next_hist, next_snap, next_ex = 0.0, 0.0, t_couple
+    next_hist = t; next_snap = np.ceil(t + 1e-9); next_ex = max(t_couple, np.ceil(t + 1e-9))
+    next_ck = np.ceil((t + 1e-9) / 10) * 10
     acc = {1: None, 2: None}
     lat_buf, cap_buf = [], []
     cpl_log = []
@@ -535,9 +544,13 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
         if t >= next_snap - 1e-9:
             snaps_t.append(t)
             wc = 0.5 * (w[:, :, 1:] + w[:, :, :-1])
-            np.savez_compressed(os.path.join(out, f"snap_{len(snaps_t) - 1:04d}.npz"), t=t, T=T.astype(np.float16),
+            np.savez_compressed(os.path.join(out, f"snap_{int(round(t)):04d}.npz"), t=t, T=T.astype(np.float16),
                                 Tmid=T[:, jm, :].astype(np.float32), wmid=wc[:, jm, :].astype(np.float32), P=P.astype(np.float32))
             next_snap += snap_dt
+            if t >= next_ck - 1e-9:
+                np.savez(os.path.join(out, "checkpoint.npz"), t=t, T=T.astype(np.float32), u=u.astype(np.float32),
+                         v=v.astype(np.float32), w=w.astype(np.float32), T_ext=T_ext)
+                next_ck += 10.0
             el = time.time() - t0w
             print(f"t {t:7.2f} s  step {step}  dt {dt * 1e3:.2f} ms  umax {umax:.3f}  Z1 {hist[-1]['z1']:.0f} mW  ice {hist[-1]['ice']:.0f}  wall {el:.0f}s", flush=True)
         if len(part_hist) == 0 or t - part_hist[-1][0] >= 0.1 - 1e-9:
@@ -546,8 +559,13 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
         if t >= t_couple and t >= next_ex - 1e-9:
             lat_m = np.mean([x[1] for x in lat_buf], axis=0); cap_m = np.mean([x[2] for x in lat_buf], axis=0)
             qf = layer_heat_to_faces(col, room, lat_m, cap_m)
-            Tsol, Tw_room = room.solve(qf)
-            T_ext = Tw_room + qf / (room.G_out * room.vf_A)
+            # stable exchange: vapour-side wall temperature -> exact room heat (admittance matrix) -> T_ext
+            GA = room.G_out * room.vf_A
+            Tw_vap = T_ext - qf / GA
+            q_exact = room.Y @ (room.T_ext0 - Tw_vap)
+            T_new = np.clip(Tw_vap + q_exact / GA, -30.0, 35.0)
+            T_ext = T_ext + RELAX * (T_new - T_ext)
+            Tsol, Tw_room = room.solve(q_exact)
             col.set_bc(*room_bc(col, room, T_ext))
             Zheat_room = room.zone_heat(Tsol)
             cpl_log.append(dict(t=t, q_pmma_mW=float(qf.sum() * 1e3), T_ext_conn_mean=float(T_ext[room.vf_kind == "wall"].mean()),
@@ -574,6 +592,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--t_end", type=float, default=120.0); ap.add_argument("--t_couple", type=float, default=60.0)
     ap.add_argument("--dx", type=float, default=1.0); ap.add_argument("--out", default=None)
-    ap.add_argument("--w1", default="25,60"); ap.add_argument("--w2", default="85,120")
+    ap.add_argument("--w1", default="25,60"); ap.add_argument("--w2", default="85,120"); ap.add_argument("--restart", default=None)
     a = ap.parse_args()
-    run(a.t_end, a.t_couple, a.dx, out=a.out, win1=tuple(map(float, a.w1.split(","))), win2=tuple(map(float, a.w2.split(","))))
+    run(a.t_end, a.t_couple, a.dx, out=a.out, win1=tuple(map(float, a.w1.split(","))), win2=tuple(map(float, a.w2.split(","))),
+        restart=a.restart)
