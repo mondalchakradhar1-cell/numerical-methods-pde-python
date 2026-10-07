@@ -155,6 +155,20 @@ let s = pres.addSlide({ masterName: "TITLE_DARK", sectionTitle: SEC[0] });
 s.addText("SAHA cold stage: thermal design of the cold zones", { placeholder: "title" });
 s.addText("How much heat reaches each copper zone, which coil layout holds the inner wall within ±0.15 K, how the methanol flows and warms in 3-D, and what the moving vapour column adds · 7 Oct 2026", { placeholder: "body" });
 
+s = content("The cold stage: two copper zones on one open vapour bore", SEC[0], "Each copper zone must hold its inner wall within ±0.15 K of its set point; the coil removes the heat that leaks in from the lab");
+addFit(s, fig("chamber_schematic.png"), 0.35, 1.05, 5.6, 5.9, { name: "chamber schematic" });
+const ZC = [
+  ["Zone 1 · copper, z 247–365 mm", HEX.accent1, [`Set point −30 °C ± 0.15 K (wall −30.15 to −29.85 °C)`, `Length 118 mm = 11 plate + 96 coil + 11 plate`, `Heat to remove ≈ ${f2(Z1)} W (${f2(base.Q1)} W conduction ${sgn(Z1 - base.Q1, 2)} W net from the moving vapour)`]],
+  ["Zone 2 · copper, z 60–187 mm", HEX.accent1, [`Set point −15 °C ± 0.15 K (wall −15.15 to −14.85 °C)`, `Length 127 mm = 11 plate + 105 coil + 11 plate`, `Heat to remove ≈ ${f2(Z2)} W (${f2(base.Q2)} W conduction ${sgn(Z2 - base.Q2, 2)} W net from the moving vapour)`]],
+  ["Around them", HEX.dk2, ["Perspex connectors 60 mm below, between and above the zones; flat Perspex cap at 425 mm", "R134a vapour in a Ø27 mm bore open from the 0 °C ice tray to the cap", "50 mm foam (k 0.035) to a 35 °C lab, h = 8 W/m²K; coolant methanol at 17.5 or 5 g/s"]],
+];
+ZC.forEach(([t, col, items], i) => {
+  const y = 1.2 + i * 1.92;
+  card(s, 6.2, y, 6.6, 1.78, `zone card ${i}`);
+  s.addText(t, { x: 6.4, y: y + 0.08, w: 6.2, h: 0.4, fontFace: "Cambria", fontSize: 15, bold: true, color: col, isTextBox: true, margin: 0 });
+  bullets(s, items, 6.4, y + 0.5, 6.25, 1.25, 11.5, `zone list ${i}`);
+});
+
 s = content("Every coil layout holds the inner wall within ±0.15 K", SEC[0], `Design basis: Zone 1 ≈ ${f2(Z1)} W, Zone 2 ≈ ${f2(Z2)} W; flattest wall with the paired axial sleeve (E_PDF)`);
 stat(s, 0.5, 1.35, 3.0, `${f2(Z1)} W`, "heat into Zone 1 (−30 °C), including the moving vapour column", null, "z1");
 stat(s, 3.65, 1.35, 3.0, `${f2(Z2)} W`, "heat into Zone 2 (−15 °C), including the moving vapour column", null, "z2");

@@ -288,3 +288,15 @@ Changes requested on the short deck (`deck/build_present.js`), now 39 slides:
 - The 0–120 s heat-flow history (`vapour/heatflow_fig.py` → `figs/v_heatflow_0_120.png`). Slide 8.
 
 **Physics wording corrected.** The time-mean vapour falls along the cold Zone 1 wall and rises in the core; in the connectors it rises along the warm Perspex. At any instant the two streams are side by side, not axisymmetric. The briefing sentence was updated to match.
+
+## 7 Oct: chamber schematic at the start of the short deck
+
+`chamber_schematic.py` → `figs/chamber_schematic.png`: a true-scale section through the axis of the cold stage, replacing the user's rough sketch. It shows:
+- the vapour bore and the Perspex connectors and cap;
+- both copper zones (wall + buffer, 86 × 11 mm end plates, Ø4 mm coil tubes, coolant in/out);
+- the 50 mm foam, the ice tray at 0 °C and the 35 °C lab;
+- the height ladder (0 / 60 / 187 / 247 / 365 / 425 / 475 mm) and diameters (bore Ø27, plates Ø86, outside Ø186).
+
+It is now slide 2 of the short deck, with one card per zone (set point, allowed range, length breakdown, heat to remove from our model) and one for the surroundings.
+
+The sketch's "about 10 W / 7.5 W" were early design assumptions. The cards use the computed 2.74 W and 1.75 W.
