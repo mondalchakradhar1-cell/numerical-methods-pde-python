@@ -472,6 +472,67 @@ bullets(s, [
   "Then the Fluent comparison (steps 2–6) against these numbers.",
 ], 7.0, 1.95, 5.6, 4.7, 13, "next list");
 
+// ================================================================= appendix (full version only)
+if (process.env.FULL) {
+  pres.addSection({ title: "Appendix" });
+  s = pres.addSlide({ masterName: "SECTION", sectionTitle: "Appendix" });
+  s.addText("Appendix · every sheet, render and animation", { placeholder: "title" });
+  s.addText("All 22 re-validated result sheets, the 3-D coolant CFD of every case at both flows, the tracer animations, the remaining wall maps and profiles, and the work log.", { placeholder: "body" });
+
+  const extra = [["wallmaps_5.png", "Inner-wall maps from the new 3-D model, 5 g/s"], ["profiles_17.5.png", "Inner wall along the height, all layouts, 17.5 g/s"],
+    ["profiles_5.png", "Inner wall along the height, all layouts, 5 g/s"], ["v_history_0_60.png", "Vapour heat flows, one-way phase 0–60 s"]];
+  for (const [f, t] of extra) {
+    if (!fs.existsSync(fig(f))) continue;
+    s = content(t, "Appendix");
+    addFit(s, fig(f), 0.4, 1.15, 12.5, 5.8, { name: t });
+  }
+  const orderA = ["A_built", "P", "A", "B", "C", "D", "E", "E_PDF", "F", "G", "H"];
+  for (const k of orderA) for (const fl of ["17.5", "5"]) {
+    const f = fig(`sheets/${k}_${fl}.png`);
+    if (!fs.existsSync(f)) continue;
+    s = content(`Result sheet: ${short(k)} at ${fl} g/s (sheet against this model)`, "Appendix");
+    addFit(s, f, 0.4, 1.1, 12.5, 5.85, { name: `sheet ${k} ${fl}` });
+  }
+  for (const k of orderA) for (const fl of ["17.5", "5"]) {
+    const f3d = fig(`coolant/${k}_${fl}_3d.png`), fp = fig(`coolant/${k}_${fl}_paths.png`), gif = fig(`coolant/${k}_${fl}_flow.gif`);
+    if (!fs.existsSync(f3d)) continue;
+    const c = (S.coolant_cfd || []).find((r) => r.layout === k && Math.abs(r.m_gs - Number(fl)) < 1e-6);
+    s = content(`Coolant CFD ${short(k)} at ${fl} g/s: temperature, streamlines, pressure`, "Appendix");
+    addFit(s, f3d, 0.4, 1.1, 12.5, 4.0, { name: `${k} ${fl} 3d` });
+    if (fs.existsSync(fp)) addFit(s, fp, 0.4, 5.1, 9.6, 1.85, { name: `${k} ${fl} paths` });
+    if (c) note(s, `CFD: spread ${f0(c.spread_mK)} mK, centring inlet ${f3(c.inlet_C)} °C, coolant rise ${f0(c.rise_mK)} mK, Δp ${f1(c.dp_kPa)} kPa, peak speed ${f2(c.umax)} m/s, ${c.cells_fluid.toLocaleString("en-US")} methanol cells.`, 10.1, 5.2, 2.8, 1.7, 11);
+    if (fs.existsSync(gif)) {
+      s = content(`Coolant CFD ${short(k)} at ${fl} g/s: methanol tracers (animated)`, "Appendix");
+      addFit(s, gif, 0.4, 1.1, 7.5, 5.85, { name: `${k} ${fl} gif` });
+      note(s, "Tracers released at the inlet follow the CFD streamlines; colour is the local methanol temperature. Plays in slide show.", 8.2, 1.4, 4.6, 2, 13);
+    }
+  }
+  // work log as a timeline (full text: WORKLOG.md in the archive)
+  const LOG = [
+    ["Geometry", "All drawings, decks and the Fluent mesh compared", "Consistent; '30 mm bore' = neck OD. Zone 1 copper 634 J/K. Fluent mesh verifier PASS."],
+    ["Heat load", "Own axisymmetric conduction model of the stack", "Zone 1 2.579 W, Zone 2 1.809 W, 74 % via plates. Zone 2 1.9 W in the cold-zone deck is ~5 % high."],
+    ["Radiation", "Gray-body bore model, exact view factors", "37 mW into Zone 1 (deck 34–40). Small → left out of the CFD (user)."],
+    ["Archetypes 1-D", "3-D copper + 1-D coolant network, 22 cases", "19/22 within 5 mK, 20/22 inlets within 20 mK. Fixed: H film diameter, A* plate contact bug; A* joint ideal (user)."],
+    ["Sheets", "Six-panel sheet per layout and flow", "18 SAME, 4 CLOSE, 0 DIFFERS; inlet-window chart; −31.5 °C outside every window."],
+    ["Coolant CFD", "Laminar NS in the passages + conjugate heat", "Fixes: 2nd-order upwind, Heun RK2, 3-D viscous limit, local-speed pressure step, voxel joins overlapped."],
+    ["Coolant CFD", "E_PDF, B, A, P, H at both flows (+ A*, C)", "Spread within ~5 mK of the sheets; E_PDF Δp 14.3 vs 14.4 kPa; H less uniform in 3-D (78 vs 69 mK)."],
+    ["Vapour run 1", "0–60 s one-way, then face-level two-way exchange", "Clean to ~85 s (Zone 1 ~175 mW); then ran away (63–126 °C, impossible). Kept 0–75 s."],
+    ["Vapour run 2", "Exchange through the full room admittance", "Amplified face noise ~145× → T_ext +18 K at the middle connector. Discarded."],
+    ["Cap", "Adiabatic cap tried, then reverted (user)", "Deck basis is a Robin cap; option kept but off."],
+    ["Vapour run 3", "Deck exchange on smooth 10 mm bands, from t = 75 s", "Stable. 85–120 s: Zone 1 172 mW, totals 2.737 / 1.748 W (deck ≈ 2.742 / 1.741 W without radiation)."],
+    ["Vapour figures", "Mid-plane, 3-D, streamlines mean + instant, GIF", "Perspex walls cool 2.4 / 2.8 / 0.26 K (deck 2.2 / 2.8 / 2.2 with radiation)."],
+    ["Coil + vapour", "CFD vapour heat map applied to the coils", "Spread +1 to +2.5 mK, inlet −9 to −19 mK (deck +2 to +7, −10 to −23 with radiation)."],
+    ["Deck", "Main deck (42 slides) + this full version", "Everything committed to the repository branch; archive with all folders."],
+  ];
+  for (let part = 0; part < 2; part++) {
+    const rows = LOG.slice(part * 7, part * 7 + 7);
+    s = content(`Work log: what was done and what it means (${part + 1}/2)`, "Appendix");
+    const T = [["Step", "What was done", "Result and meaning"]].map((r) => r.map(HDR));
+    rows.forEach((r) => T.push([TD(r[0], { bold: true, fontSize: 12 }), TD(r[1], { fontSize: 12 }), TD(r[2], { fontSize: 12 })]));
+    s.addTable(T, { x: 0.5, y: 1.3, w: 12.3, colW: [1.9, 4.2, 6.2], rowH: 0.7, border: TB, objectName: "work log table" });
+  }
+}
+
 pres.writeFile({ fileName: OUT }).then(async () => {
   await applyTheme(OUT, THEME);
   console.log("wrote", OUT);

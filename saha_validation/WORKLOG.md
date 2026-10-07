@@ -203,3 +203,7 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   overview and verdict, geometry and heat load, 11 archetypes (1-D model, result sheets, inlet windows), 3-D coolant CFD
   (table, per-layout 3-D renders, tracer GIFs), coupled vapour column (model, coupling fix, mid-plane, 3-D, streamlines
   mean + instant, 0–120 s GIF, heat flows, Perspex coupling, deck comparison, coil effect), limits and next steps.
+- 08:20 UTC — **full deck and archive**: `SAHA_revalidation_FULL.pptx` (96 slides: main deck + appendix with all 22 result
+  sheets, every coolant CFD case at both flows with tracer animations, extra wall maps/profiles, work-log timeline) and
+  `SAHA_revalidation_all.zip` (inputs, code, all results incl. vapour runs, figures, both decks, work log, README).
+  Both are too large for the git branch (98 MB / 437 MB) and are delivered as files; the code and main deck are on the branch.
