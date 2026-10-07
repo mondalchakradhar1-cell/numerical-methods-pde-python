@@ -25,8 +25,8 @@ sys.path.insert(0, HERE)
 
 RHO, CP, KV, MU, BETA = 4.2254, 786.6, 0.009788, 1.0041e-5, 3.874e-3
 NU, ALPHA, G = MU / RHO, KV / (RHO * CP), 9.81
-# superheated liquid R134a at 84.4 kPa (T_sat = -30 C): the Zone 1 wall sits at saturation and the rest of the column
-# is liquid superheated by up to 30 K (metastable, no nucleation modelled); a bubble that forms condenses at the -30 C wall.
+# setup C: chamber completely full of liquid R134a, pressurised (bellows). The warm lower part is the superheated,
+# bubble-sensitive volume; the bore through the cold zones holds subcooled liquid. Single phase (no bubble event).
 # Properties: saturated liquid at -15 C (column mean); liquid properties barely depend on pressure.
 LIQUID = dict(RHO=1327.0, CP=1300.0, KV=0.0985, MU=3.25e-4, BETA=2.3e-3)
 
