@@ -28,6 +28,7 @@ NU, ALPHA, G = MU / RHO, KV / (RHO * CP), 9.81
 T_REF = -15.0
 R, H = 13.5e-3, 423.5e-3
 RELAX = 0.5
+CAP_ADIABATIC = [True]   # Perspex cap underside (z = 423.5 mm): no heat exchange with the vapour
 REGIONS = ["ice", "conn_lo", "z2", "conn_mid", "z1", "top_wall", "cap"]
 
 
@@ -337,6 +338,8 @@ class Column:
         gb = Abot * hz * self.sec
         wG[:, :, 0] += gb; wGT[:, :, 0] += gb * 0.0
         gc = Abot * self.sec / (1 / Gcap + 1 / hz)
+        if CAP_ADIABATIC[0]:
+            gc = gc * 0.0
         wG[:, :, -1] += gc; wGT[:, :, -1] += gc * Tcap
         self.wG_W = wG                                    # W/K
         self.wTb = np.where(wG > 0, wGT / np.where(wG > 0, wG, 1), 0.0)
@@ -455,7 +458,7 @@ def layer_heat_to_faces(col, room, lat_mean, cap_mean):
 
 
 def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, hist_dt=0.05, npart=2000, seed=1,
-        win1=(25.0, 60.0), win2=(85.0, 120.0), restart=None):
+        win1=(25.0, 60.0), win2=(85.0, 120.0), restart=None, top_from_conduction=False):
     import room as roommod
     out = out or os.path.join(HERE, "out")
     os.makedirs(out, exist_ok=True)
@@ -484,7 +487,13 @@ def run(t_end=120.0, t_couple=60.0, dx_mm=1.0, cfl=0.35, out=None, snap_dt=1.0, 
         t = float(rs["t"])
         if "u" in rs:
             u[:], v[:], w[:] = rs["u"], rs["v"], rs["w"]
-        T = np.where(col.fl, rs["T"].astype(float), 0.0) + 1e-3 * rng.standard_normal(T.shape) * col.fl
+        T_rs = np.where(col.fl, rs["T"].astype(float), 0.0)
+        if top_from_conduction:
+            # top region (z > 365 mm) is stably stratified and nearly still: take it from the conduction
+            # solution of the new boundary conditions instead of the old state
+            ktop = col.zc * 1e3 > 365.0
+            T_rs[:, :, ktop] = T[:, :, ktop]
+        T = T_rs + 1e-3 * rng.standard_normal(T.shape) * col.fl
         print(f"restart from {restart} at t = {t:.2f} s (velocity {'restored' if 'u' in rs else 'from rest'})", flush=True)
     hist = []; snaps_t = []
     next_hist = t; next_snap = np.ceil(t + 1e-9); next_ex = max(t_couple, np.ceil(t + 1e-9))
@@ -593,6 +602,8 @@ if __name__ == "__main__":
     ap.add_argument("--t_end", type=float, default=120.0); ap.add_argument("--t_couple", type=float, default=60.0)
     ap.add_argument("--dx", type=float, default=1.0); ap.add_argument("--out", default=None)
     ap.add_argument("--w1", default="25,60"); ap.add_argument("--w2", default="85,120"); ap.add_argument("--restart", default=None)
+    ap.add_argument("--top_from_conduction", action="store_true"); ap.add_argument("--cap_robin", action="store_true")
     a = ap.parse_args()
+    CAP_ADIABATIC[0] = not a.cap_robin
     run(a.t_end, a.t_couple, a.dx, out=a.out, win1=tuple(map(float, a.w1.split(","))), win2=tuple(map(float, a.w2.split(","))),
-        restart=a.restart)
+        restart=a.restart, top_from_conduction=a.top_from_conduction)
