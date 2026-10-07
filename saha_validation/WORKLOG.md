@@ -167,3 +167,7 @@ boundary, as in the deck. The option remains as `--cap_adiabatic` but is not use
   fixes the 5 g/s divergence; (3) "links" (hairpin-type joins) only for one-to-one series joins — the H jacket's
   collector had been mistaken for a hairpin (its 163 mK rise was an artifact); (4) Δp now follows the worst series
   path (E_PDF's 109 kPa had summed parallel lanes). Rerunning E_PDF and H at 17.5 g/s and the five layouts at 5 g/s.
+- 06:46 UTC — band-coupled vapour run healthy at t = 85–88 s: Zone 1 draws 177–196 mW (deck 178), region means
+  lower conn −9.7…−10.1 °C (deck −9.0), Zone 2 −15.3…−15.4 (−15.2), middle conn −20.7…−21.0 (−20.8), Zone 1
+  −26.3…−26.5 (−26.5), top −0.85 (−2.8 with radiation); max 19.9 °C < cap 21.7 °C (physical). E_PDF 17.5 g/s CFD with
+  the corrected Δp path: 16.3 kPa vs sheet 14.4 kPa.
